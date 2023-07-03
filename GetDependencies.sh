@@ -31,6 +31,25 @@ mkdir install
     
 export LD_LIBRARY_PATH=`pwd`/install/lib:$LD_LIBRARY_PATH
 
+cd ../
+
+git clone https://github.com/ToolFramework/ToolFrameworkCore.git
+
+cd ToolFrameworkCore
+make clean
+make -j $threads
+
+export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+cd ../
+
+git clone https://github.com/ToolDAQ/ToolDAQFramework.git
+
+cd ToolDAQFramework
+make clean
+make -j $threads
+export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+
+
 cd ../..
 
 make
