@@ -55,6 +55,9 @@ int main(){
 
   DAQ_inter.SC_vars["Status"]->SetValue("Ready");
 
+  DAQ_inter.SC_vars.Add("Stuff",SlowControlElementType(INFO));
+  DAQ_inter.SC_vars["Stuff"]->SetValue(" hello this is an information message ,.!{}[]<>?/`~'@\" ");
+
   DAQ_inter.SC_vars.Add("Start",SlowControlElementType(BUTTON));
   DAQ_inter.SC_vars["Start"]->SetValue(false);
 
