@@ -1,41 +1,42 @@
 #include <DAQInterface.h>
 
-DAQInterface::DAQInterface(std::string name){
+DAQInterface::DAQInterface(){
 
-  m_name=name;
-
-  mp_SD = new ServiceDiscovery(true, false, 88888, "239.192.1.1", 5000, &m_context, boost::uuids::random_generator()(), name, 5, 60);
-
-  SC_vars.InitThreadedReceiver(&m_context, 88888, 100, false);
-
+  sc_vars.InitThreadedReceiver(&m_context, 88888, 100, false);
+  
   m_pgclient.SetUp(&m_context);
-
-  std::string configfile="./PGClientConfig";
-
-  m_dbname="daq";
-
-  if(!m_pgclient.Initialise(configfile)){
-
-    std::cout<<"error initialising pgclient"<<std::endl;
-
-  }
-
-  // we should connect here i guess
-
-  // after Initilising the pgclient needs ~15 seconds for the middleman to connect
-  std::this_thread::sleep_for(std::chrono::seconds(15));
-  // hopefully the middleman has found us by now
-
+  
 }
  
 DAQInterface::~DAQInterface(){
 
   m_pgclient.Finalise();
-  SC_vars.Clear();
+  sc_vars.Clear();
   delete mp_SD;
   mp_SD=0;
   
 }
+
+bool DAQInterface::Init(std::string name, std::string pg_client_configfile, std::string db_name){
+  
+  m_name=name; 
+  m_dbname=db_name;
+  
+  mp_SD = new ServiceDiscovery(true, false, 88888, "239.192.1.1", 5000, &m_context, boost::uuids::random_generator()(), name, 5, 60);
+   
+  if(!m_pgclient.Initialise(pg_client_configfile)){
+    
+    std::cout<<"error initialising pgclient"<<std::endl;
+    return false;
+  }
+   
+  // after Initilising the pgclient needs ~15 seconds for the middleman to connect
+  std::this_thread::sleep_for(std::chrono::seconds(15));
+  // hopefully the middleman has found us by now
+  
+  return true;
+}
+
 
 bool DAQInterface::SQLQuery(std::string dbname, std::string query_string, std::string &result, int &timeout, std::string& err){
  
@@ -144,3 +145,52 @@ if(!SQLQuery(m_dbname, query, json_data, timeout, err)){
   return true;
 
 }
+
+SlowControlCollection* DAQInterface::GetSlowControlCollection(){
+
+  return &sc_vars;
+
+}
+
+SlowControlElement* DAQInterface::GetSlowControlVariable(std::string key){
+
+  return  sc_vars[key];
+  
+}
+
+bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string()> function){
+  
+return  sc_vars.Add(name, type, function);
+  
+}
+
+bool DAQInterface::RemoveSlowControlVariable(std::string name){
+
+  return sc_vars.Remove(name);  
+  
+}
+
+void DAQInterface::ClearSlowControlVariables(){
+
+  sc_vars.Clear();
+
+}
+bool DAQInterface::TriggerSubscribe(std::string trigger, std::function<void()> function){
+
+return  sc_vars.TriggerSubscribe(trigger, function);
+
+}
+bool DAQInterface::TriggerSend(std::string trigger){
+
+  return sc_vars.TriggerSend(trigger);
+
+}
+std::string DAQInterface::PrintSlowControlVariables(){
+
+  return sc_vars.Print();
+
+}
+
+
+
+

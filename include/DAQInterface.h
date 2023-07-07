@@ -12,6 +12,11 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/progress.hpp>
 #include <PGClient.h>
+#include <functional>
+
+///removing header to pass into store
+//   config_json.replace(0,9,"");
+//    config_json.replace(config_json.end()-2, config_json.end(),"");
 
 
 class DAQInterface{
@@ -26,16 +31,31 @@ class DAQInterface{
 
  public:
 
-  DAQInterface(std::string name);
+  DAQInterface();
   ~DAQInterface();
+  bool Init(std::string name, std::string pg_client_configfile, std::string db_name);
   bool SQLQuery(std::string dbname, std::string query_string, std::string &result, int &timeout, std::string& err);
   bool SendLog(std::string message, int severity=2, std::string device="");
   bool SendAlarm(std::string message, std::string device="");
   bool SendMonitoringData(std::string json_data, std::string device="");
   bool SendConfig(std::string json_data, std::string device="");
   bool GetConfig(std::string &json_data, int version, std::string device="");
-  SlowControlCollection SC_vars;
 
+  SlowControlCollection* GetSlowControlCollection();
+  SlowControlElement* GetSlowControlVariable(std::string key);
+  bool AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string()> function=nullptr);
+  bool RemoveSlowControlVariable(std::string name);
+  void ClearSlowControlVariables();
+  bool TriggerSubscribe(std::string trigger, std::function<void()> function);
+  bool TriggerSend(std::string trigger);
+  std::string PrintSlowControlVariables();
+
+  template<typename T> T GetSlowControlValue(std::string name){
+    return sc_vars[name]->GetValue<T>();
+  }
+
+  SlowControlCollection sc_vars;
+  
 };
 
 #endif
