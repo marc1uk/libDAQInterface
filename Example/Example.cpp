@@ -80,7 +80,10 @@ int main(){
   //defining slow control values
   
   DAQ_inter->sc_vars["Status"]->SetValue("Ready"); 
-  
+
+  DAQ_inter->sc_vars.Add("Info",SlowControlElementType(INFO));
+  DAQ_inter->sc_vars["Info"]->SetValue(" hello this is an information message ,.!{}[]<>?/`~'@\" ");
+ 
   DAQ_inter->sc_vars.Add("Start",SlowControlElementType(BUTTON), AutomatedFunctions::start_func);
   DAQ_inter->sc_vars["Start"]->SetValue(false);
   
