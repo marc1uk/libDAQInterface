@@ -78,7 +78,7 @@ int main(){
   DAQ_inter.SendLog("important message", 0, device_name);   //sending log message to database
   DAQ_inter.SendLog("normal message");   //sending log message to database defualt level 2 defult name is name passed to DAQInterface constructor
 
-  DAQ_inter.SendAlarm("High current alarm"); // sending alarm message to database
+  DAQ_inter.SendAlarm("High current on channel 3", "High current alarm"); // sending alarm message to database
 
   DAQ_inter.TriggerSubscribe("new_event",  std::bind(&AutomatedFunctions::new_event_func, automated_functions)); // if the DAQ sends out a global "new_event" trigger will before the specifed function
 
@@ -155,7 +155,7 @@ int main(){
     
     //std::cout<<"sending new config_json: '"<<config_json<<"'"<<std::endl;
   
-    DAQ_inter.SendConfig(config_json); //uplaod configuration to database
+    DAQ_inter.SendConfig(config_json, "Example"); //uplaod configuration to database
     
   } else{
 
@@ -274,7 +274,7 @@ int main(){
     
     ////////////////////////////////    
 
-      usleep(100);
+      sleep(1);
 
     } // end of operation loop
 

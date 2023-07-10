@@ -54,13 +54,13 @@ bool DAQInterface::SQLQuery(std::string dbname, std::string query_string, std::s
 }
 
 
-bool DAQInterface::SendLog(std::string message, int severity, std::string device){
+bool DAQInterface::SendLog(std::string message, int severity, std::string source){
 
-  if(device=="") device=m_name;
+  if(source=="") source=m_name;
   std::string err="";
   int timeout=300;
   std::string result;
-  std::string query_string="insert into logging (time, source, severity, message) values (now(), '" + device + "', "+std::to_string(severity)+", '" + message + "');";
+  std::string query_string="insert into logging (time, source, severity, message) values (now(), '" + source + "', "+std::to_string(severity)+", '" + message + "');";
 
   if(!SQLQuery(m_dbname , query_string, result, timeout, err)){
     
@@ -74,13 +74,13 @@ bool DAQInterface::SendLog(std::string message, int severity, std::string device
 
 }
 
-bool DAQInterface::SendAlarm(std::string message, std::string device){
+bool DAQInterface::SendAlarm(std::string message, std::string type, std::string source){
   
-  if(device=="") device=m_name;
+  if(source=="") source=m_name;
   std::string err="";
   int timeout=300;
   std::string result;
-  std::string query_string="insert into Alarms (time, name, alarm) values (now(), '" + device + "', '" + message + "');";
+  std::string query_string="insert into alarms (time, source, type, alarm) values (now(), '" + source + "', '" + type + "', '" + message + "');";
   
   if(!SQLQuery(m_dbname , query_string, result, timeout, err)){
     std::cerr<<"SendAlarm error: "<<err<<std::endl;
@@ -91,13 +91,13 @@ bool DAQInterface::SendAlarm(std::string message, std::string device){
 
 }
 
-bool DAQInterface::SendMonitoringData(std::string json_data, std::string device){
+bool DAQInterface::SendMonitoringData(std::string json_data, std::string source){
 
-  if(device=="") device=m_name;
+  if(source=="") source=m_name;
   std::string err="";
   int timeout=300;
   std::string result;
-  std::string query_string="insert into monitoring (time, name, data) values (now(), '" + device + "', '" + json_data + "');";
+  std::string query_string="insert into monitoring (time, source, data) values (now(), '" + source + "', '" + json_data + "');";
 
   if(!SQLQuery(m_dbname , query_string, result, timeout, err)){
     std::cerr<<"SendMonitoringData error: "<<err<<std::endl;
@@ -110,7 +110,7 @@ bool DAQInterface::SendMonitoringData(std::string json_data, std::string device)
 }
 
 
-bool DAQInterface::SendConfig(std::string json_data, std::string device){
+bool DAQInterface::SendConfig(std::string json_data, std::string author, std::string device){
 
 
   if(device=="") device=m_name;
@@ -118,7 +118,7 @@ bool DAQInterface::SendConfig(std::string json_data, std::string device){
   std::string result;
   int timeout=300;
   std::string err="";
-  std::string query= "insert into configurations (time, name, version, data) values (now(), '"+ device + "', '0', '"+ json_data + "');";
+  std::string query= "insert into device_config (time, device, version, author, data) values (now(), '"+ device + "', '0', '" + author + "', '" + json_data + "');";
   
 if(!SQLQuery(m_dbname, query, result, timeout, err)){
     std::cerr<<"SendConfig error: "<<err<<std::endl;  
@@ -135,7 +135,7 @@ bool DAQInterface::GetConfig(std::string& json_data, int version, std::string de
 
   int timeout=300;
   std::string err="";
-  std::string query= "select data from configurations";// where name='"+ device + "' and version=" + std::to_string(version) +");";
+  std::string query= "select data from device_config where device='"+ device + "' and version=" + std::to_string(version) +";";
   
 if(!SQLQuery(m_dbname, query, json_data, timeout, err)){
     std::cerr<<"GetConfig error: "<<err<<std::endl;

@@ -35,10 +35,10 @@ class DAQInterface{
   ~DAQInterface();
   bool Init(std::string name, std::string pg_client_configfile, std::string db_name);
   bool SQLQuery(std::string dbname, std::string query_string, std::string &result, int &timeout, std::string& err);
-  bool SendLog(std::string message, int severity=2, std::string device="");
-  bool SendAlarm(std::string message, std::string device="");
-  bool SendMonitoringData(std::string json_data, std::string device="");
-  bool SendConfig(std::string json_data, std::string device="");
+  bool SendLog(std::string message, int severity=2, std::string source="");
+  bool SendAlarm(std::string message, std::string type, std::string source="");
+  bool SendMonitoringData(std::string json_data, std::string source="");
+  bool SendConfig(std::string json_data, std::string author, std::string device="");
   bool GetConfig(std::string &json_data, int version, std::string device="");
 
   SlowControlCollection* GetSlowControlCollection();
