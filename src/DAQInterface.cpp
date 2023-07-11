@@ -130,14 +130,14 @@ if(!SQLQuery(m_dbname, query, result, timeout, err)){
 }
 
 bool DAQInterface::GetConfig(std::string& json_data, int version, std::string device){
-
+  
   if(device=="") device=m_name;
 
   int timeout=300;
   std::string err="";
   std::string query= "select data from device_config where device='"+ device + "' and version=" + std::to_string(version) +";";
   
-if(!SQLQuery(m_dbname, query, json_data, timeout, err)){
+  if(!SQLQuery(m_dbname, query, json_data, timeout, err)){
     std::cerr<<"GetConfig error: "<<err<<std::endl;
     return false;
   }
@@ -158,7 +158,7 @@ SlowControlElement* DAQInterface::GetSlowControlVariable(std::string key){
   
 }
 
-bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string()> function){
+bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(std::string)> function){
   
 return  sc_vars.Add(name, type, function);
   
@@ -175,7 +175,7 @@ void DAQInterface::ClearSlowControlVariables(){
   sc_vars.Clear();
 
 }
-bool DAQInterface::TriggerSubscribe(std::string trigger, std::function<void()> function){
+bool DAQInterface::TriggerSubscribe(std::string trigger, std::function<void(std::string)> function){
 
 return  sc_vars.TriggerSubscribe(trigger, function);
 
@@ -188,6 +188,12 @@ bool DAQInterface::TriggerSend(std::string trigger){
 std::string DAQInterface::PrintSlowControlVariables(){
 
   return sc_vars.Print();
+
+}
+
+std::string DAQInterface::GetDeviceName(){
+
+  return m_name;
 
 }
 

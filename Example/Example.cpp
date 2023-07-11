@@ -14,7 +14,7 @@ public:
 
   DAQInterface* DAQ_inter;
   
-  void new_event_func(){
+  void new_event_func(std::string trigger){
 
     DAQ_inter->SendLog("Hello i received a new_event trigger");
     
@@ -23,7 +23,7 @@ public:
   }
   
   
-  std::string start_func(){
+  std::string start_func(std::string key){
 
     std::string tmp_msg="Device started";
     DAQ_inter->SendLog(tmp_msg);
@@ -33,11 +33,10 @@ public:
     
   }
   
-  std::string voltage_change_func(){
+  std::string voltage_change_func(std::string key){
 
-    //update hardware voltages 1 & 3 with values from:
-    // DAQ_inter->SC_vars["voltage_1"]->GetValue<float>()
-    // DAQ_inter->SC_vars["voltage_3"]->GetValue<float>()
+    //update hardware voltages 1 or 3 with values from:
+    // DAQ_inter->SC_vars[key"]->GetValue<float>()
     
     std::string ret = "Changed voltages";
     return ret;
@@ -80,7 +79,7 @@ int main(){
 
   DAQ_inter.SendAlarm("High current on channel 3", "High current alarm"); // sending alarm message to database
 
-  DAQ_inter.TriggerSubscribe("new_event",  std::bind(&AutomatedFunctions::new_event_func, automated_functions)); // if the DAQ sends out a global "new_event" trigger will before the specifed function
+  DAQ_inter.TriggerSubscribe("new_event",  std::bind(&AutomatedFunctions::new_event_func, automated_functions,  std::placeholders::_1)); // if the DAQ sends out a global "new_event" trigger will before the specifed function
 
 
   ///////////////////////////////////////////////////////////////////////////
@@ -94,7 +93,7 @@ int main(){
   DAQ_inter.sc_vars.Add("Info",SlowControlElementType(INFO));
   DAQ_inter.sc_vars["Info"]->SetValue(" hello this is an information message ,.!{}[]<>?/`~'@\" ");
  
-  DAQ_inter.sc_vars.Add("Start",SlowControlElementType(BUTTON), std::bind(&AutomatedFunctions::start_func, automated_functions));
+  DAQ_inter.sc_vars.Add("Start",SlowControlElementType(BUTTON), std::bind(&AutomatedFunctions::start_func, automated_functions,  std::placeholders::_1));
   DAQ_inter.sc_vars["Start"]->SetValue(false);
   
   DAQ_inter.sc_vars.Add("Stop",SlowControlElementType(BUTTON));
@@ -109,7 +108,7 @@ int main(){
   DAQ_inter.sc_vars["power_on"]->SetValue("0");
   
  
-  DAQ_inter.sc_vars.Add("voltage_1", SlowControlElementType(VARIABLE),  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions));  //example variable with automated functions
+  DAQ_inter.sc_vars.Add("voltage_1", SlowControlElementType(VARIABLE),  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions,  std::placeholders::_1));  //example variable with automated functions
   DAQ_inter.sc_vars["voltage_1"]->SetMin(0);
   DAQ_inter.sc_vars["voltage_1"]->SetMax(5000);
   DAQ_inter.sc_vars["voltage_1"]->SetStep(0.1);
@@ -121,7 +120,7 @@ int main(){
   DAQ_inter.sc_vars["voltage_2"]->SetStep(10);
   DAQ_inter.sc_vars["voltage_2"]->SetValue(4000);
   
-  DAQ_inter.sc_vars.Add("voltage_3", SlowControlElementType(VARIABLE),  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions));
+  DAQ_inter.sc_vars.Add("voltage_3", SlowControlElementType(VARIABLE),  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions,  std::placeholders::_1));
   DAQ_inter.sc_vars["voltage_3"]->SetMin(0);
   DAQ_inter.sc_vars["voltage_3"]->SetMax(5000);
   DAQ_inter.sc_vars["voltage_3"]->SetStep(0.1);
