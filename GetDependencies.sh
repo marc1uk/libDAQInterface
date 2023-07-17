@@ -4,12 +4,12 @@ threads=`nproc --all`
 
 APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-mkdir Dependencies
+mkdir -p Dependencies
 cd Dependencies
 DEPDIR=`pwd`
 
 # sanitize arguments list
-declare -A args
+argstring=""
 PATTERN='\-\-([^ =]+)[ =]?([01])?'
 LOOPCOUNT=0
 flagstring=$*
@@ -19,7 +19,8 @@ while [[ $flagstring =~ ${PATTERN} ]]; do
 	if [ -z "${VALUE}" ]; then
 		VALUE=1
 	fi
-	args+="${KEY}=${VALUE} "
+	argstring+="${KEY}=${VALUE} "
+	# remove this option from input flagstring
 	flagstring="${flagstring/${BASH_REMATCH[0]}/}"
 	let LOOPCOUNT=$LOOPCOUNT+1
 	if [ $LOOPCOUNT -gt 10 ]; then
@@ -30,7 +31,7 @@ done
 # array of things to install
 declare -A flags
 
-if [ -z ${flagstring} ]; then
+if [ -z ${argstring} ]; then
 	# if no arguments given, start with default selections
 	flags["zmq"]="on"
 	flags["boost"]="on"
@@ -76,7 +77,8 @@ else
 	flags["python"]="off"
 	
 	# ... and parse arguments for user selections
-	for flag in ${args[*]}; do
+	for flag in ${argstring[*]}; do
+		echo "setting option ${flag}"
 		case $flag in
 			zmq*|boost*|toolframework*|tooldaq*|python*)
 				feature=${flag%=*}
@@ -95,6 +97,8 @@ else
 		esac
 	done
 fi
+
+echo "selected dependencies: ${flags[*]}"
 
 # enforce dependencies of dependencies?
 oldflags="${flags[*]}"
@@ -182,9 +186,9 @@ fi
 
 if [ "${flags['python']}" == "on" ]; then
 	cd ${DEPDIR}
-	${APPDIR}/scripts/Python/Import.sh $PWD /opt
+	${APPDIR}/scripts/Python/Import.sh $APPDIR /opt
 fi
 
-cd ${DEPDIR}/..
+cd ${APPDIR}
 make
 

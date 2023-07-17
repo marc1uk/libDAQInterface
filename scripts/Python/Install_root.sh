@@ -23,7 +23,11 @@ for m in v: print(m, end=' ')
     RESULT="$(echo -n ${RESULT} | xargs echo -n)"
     echo $RESULT | sed 's/ /·/g;s/\t/￫/g;s/\r/§/g;s/$/¶/g'  # check whitespace
     if [ "$RESULT" != "0 1 2 3 4 5 6 7 8 9" ]; then
-        echo "Test Failed! Check your installation of python3 and cppyy!"
+        if [ "$1" != "q" ]; then
+            echo "Test Failed! Check your installation of python3 and cppyy!"
+        else
+            echo "cppyy not found"
+        fi
         return 1
     else
         echo "Test Passed"
@@ -32,7 +36,7 @@ for m in v: print(m, end=' ')
 }
 
 echo "checking for pre-existing presence of cppyy"
-checkcppyy
+checkcppyy "q"
 if [ $? -eq 0 ]; then
 	# if we already have it, we have nothing to do....
 	# TODO the PythonScript c++ interface may require at least python3-devel as well...?
@@ -65,7 +69,7 @@ if [ ${REDHATLIKE} -eq 0 ]; then
 	# trigger yum to update its metadata
 	echo "updating yum metadata..."
 	yum list installed >/dev/null 2>&1
-	DEPS=(git make gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel python openssl-devel fftw-devel libuuid-devel)
+	DEPS=(git make gcc-c++ gcc binutils libX11-devel libXpm-devel libXft-devel libXext-devel python3 python3-devel openssl-devel fftw-devel libuuid-devel)
 	# centos7 requires cmake3 from epel
 	RHVER=$(grep "VERSION_ID" /etc/os-release | cut -d\" -f2)
 	RHOLD=$(echo -e "8\n${RHVER}" | sort -V -C; echo $?)
@@ -90,7 +94,7 @@ if [ ${REDHATLIKE} -eq 0 ]; then
 	done
 elif [ ${DEBIANLIKE} -eq 0 ]; then
 	echo "debian based OS"
-	DEPS=(dpkg-dev cmake g++ gcc binutils libx11-dev libxpm-dev libxft-dev libxext-dev python libssl-dev libfftw3-dev)
+	DEPS=(dpkg-dev cmake g++ gcc binutils libx11-dev libxpm-dev libxft-dev libxext-dev python3 python3-dev libssl-dev libfftw3-dev)
 	# per 'dpkg -S $(readlink `which which`)', which is provided by debian-utils, at least in debian.
 	for DEP in "${DEPS[@]}"; do
 		echo "looking for ${DEP}..."
@@ -230,7 +234,7 @@ rm -f root_v${ROOTVER}.source.tar.gz
 mkdir root_v${ROOTVER}   # install dir
 mkdir rootbuild          # build dir (temporary)
 cd rootbuild
-cmake3 ../root-${ROOTVER} -Dgdml=ON -Dxml=ON -Dmt=ON -Dmathmore=ON -Dx11=ON -Dimt=ON -Dtmva=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -Dpythia6=ON -Dfftw3=ON -DCMAKE_INSTALL_PREFIX=${INSTALLDIR}/root_v${ROOTVER} #-DCMAKE_CXX_STANDARD=14
+cmake3 ../root-${ROOTVER} -Dpyroot=ON -Dgdml=ON -Dxml=ON -Dmt=ON -Dmathmore=ON -Dx11=ON -Dimt=ON -Dtmva=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -Dpythia6=ON -Dfftw3=ON -DCMAKE_INSTALL_PREFIX=${INSTALLDIR}/root_v${ROOTVER} #-DCMAKE_CXX_STANDARD=14
 make -j$(nproc)
 make install
 cd ../
@@ -252,7 +256,7 @@ fi
 # if found and writable add ROOT setup
 cat << EOF >> ${APPDIR}/Setup.sh
 
-export source ${INSTALLDIR}/root_v${ROOTVER}/bin/thisroot.sh
+source ${INSTALLDIR}/root_v${ROOTVER}/bin/thisroot.sh
 
 EOF
 
