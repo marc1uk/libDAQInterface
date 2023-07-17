@@ -161,7 +161,7 @@ SlowControlElement* DAQInterface::GetSlowControlVariable(std::string key){
   
 }
 
-bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(std::string)> function){
+bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> function){
   
 return  sc_vars.Add(name, type, function);
   
@@ -178,7 +178,7 @@ void DAQInterface::ClearSlowControlVariables(){
   sc_vars.Clear();
 
 }
-bool DAQInterface::TriggerSubscribe(std::string trigger, std::function<void(std::string)> function){
+bool DAQInterface::TriggerSubscribe(std::string trigger, std::function<void(const char*)> function){
 
 return  sc_vars.TriggerSubscribe(trigger, function);
 

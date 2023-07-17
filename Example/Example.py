@@ -26,26 +26,34 @@ class AutomatedFunctions:
     self.DAQ_inter = iDAQ_inter
     self.name = iname
   
-  def new_event_func(self):
-    print("new_event_func triggered!")
-    self.DAQ_inter.SendLog(self.name+" received a new_event trigger")
+  def new_event_func(self, event_name: str) -> None:
+    print("new_event_func triggered for event ",event_name)
+    self.DAQ_inter.SendLog(self.name+" received a trigger for event "+event_name)
     # add your desired actions on new_event here
+    # if this function is subscribed to multiple triggers, you can use event_name
+    # to determine the appropriate actions to take
+    # return type for TriggerSubscribe functions is void (no return value)
   
-  def start_func(self):
+  def start_func(self, control_name: str) -> str:
     self.DAQ_inter.SendLog(self.name," received start signal")
     # add code to perform any startup actions here
-    return True
+    ret = "Service Started"
+    return ret
   
-  def change_voltage(self):
-    # add appropriate code to enact changing a voltage here
-    print("voltage change callback!")
-    msg = self.name + "changed voltage"
+  def change_voltage(self, control_name: str) -> str:
+    print("voltage change callback for control ",control_name)
+    # the same function can be registered as a callback for multiple controls;
+    # the changed control name is received as an argument.
+    # so e.g. this function may be registered to controls for multiple HV channels
+    # (each with a unique name), with the name received identifying the channel altered.
+    # get the new value of the control (i.e. the requested voltage)
+    new_voltage = self.DAQ_inter.sc_vars[control_name].GetValue['float']()
+    # add appropriate code to enact changing the voltage here
+    msg = self.name + " setting voltage of "+control_name+" to "+str(new_voltage)
     self.DAQ_inter.SendLog(msg)
-    #response = std.string("yes")
-    #response.__python_owns__= False
-    response = "response"
-    print("returning")
-    return response
+    # the function should return a string, for example indicating success/failure
+    ret = control_name+" set to "+str(new_voltage)+"V"
+    return ret
   
 
 if __name__ == "__main__":
@@ -87,10 +95,8 @@ if __name__ == "__main__":
   # we can register functions to be invoked in response to a broadcast event,
   # such as the start of a new run or when the program state changes (an example is given later).
   # we register a function with the DAQInterface::TriggerSubscribe method.
-  # the first argument is the name of an event, the second argument is a
-  # std::function wrapping any callable object that takes no arguments.
-  # for c++ member functions we must use std::bind to attach an instance of the corresponding class.
-  # for python we must pass a reference to the desired function, which must remain in scope.
+  # for python we must pass a variable assigned to the desired function,
+  # and that variable must still be in scope at any time it may be invoked.
   # i.e. we cannot pass 'automated_functions.new_event_func' directly as per:
   #DAQ_inter.TriggerSubscribe("new_event", automated_functions.new_event_func)
   # but instead we must do this:
@@ -154,7 +160,6 @@ if __name__ == "__main__":
   # similar to subscriber functions, we can register a callback function to be invoked
   # whenever a control value is changed. This enables us to act on changes when they happen
   # without the need to constantly poll the DAQInterface to identify when something changes.
-  #DAQ_inter.sc_vars.Add("voltage_2", cppyy.gbl.SlowControlElementType(VARIABLE), std::bind(&AutomatedFunctions::change_voltage, automated_functions))
   change_voltage_ref = automated_functions.change_voltage
   DAQ_inter.sc_vars.Add("voltage_2", cppyy.gbl.SlowControlElementType(cppyy.gbl.VARIABLE), change_voltage_ref)
   DAQ_inter.sc_vars["voltage_2"].SetMin(0)
