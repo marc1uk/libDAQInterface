@@ -182,11 +182,7 @@ fi
 
 if [ "${flags['python']}" == "on" ]; then
 	cd ${DEPDIR}
-	git clone ????
-	cd ???
-	
-	./Import.sh $PWD /opt
-	cp Example.py ${APPDIR}/Example/
+	${APPDIR}/scripts/Python/Import.sh $PWD /opt
 fi
 
 cd ${DEPDIR}/..
