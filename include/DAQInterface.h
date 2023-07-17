@@ -43,11 +43,11 @@ class DAQInterface{
 
   SlowControlCollection* GetSlowControlCollection();
   SlowControlElement* GetSlowControlVariable(std::string key);
-  bool AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(std::string)> function=nullptr);
+  bool AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> function=nullptr);
   bool RemoveSlowControlVariable(std::string name);
   void ClearSlowControlVariables();
 
-  bool TriggerSubscribe(std::string trigger, std::function<void(std::string)> function);
+  bool TriggerSubscribe(std::string trigger, std::function<void(const char*)> function);
   bool TriggerSend(std::string trigger);
   std::string PrintSlowControlVariables();
   std::string GetDeviceName();

@@ -14,7 +14,7 @@ public:
 
   DAQInterface* DAQ_inter;
   
-  void new_event_func(std::string trigger){
+  void new_event_func(const char* trigger){
 
     DAQ_inter->SendLog("Hello i received a new_event trigger");
     
@@ -23,7 +23,7 @@ public:
   }
   
   
-  std::string start_func(std::string key){
+  std::string start_func(const char* key){
 
     std::string tmp_msg="Device started";
     DAQ_inter->SendLog(tmp_msg);
@@ -33,10 +33,10 @@ public:
     
   }
   
-  std::string voltage_change_func(std::string key){
+  std::string voltage_change_func(const char* key){
 
     //update hardware voltages 1 or 3 with values from:
-    // DAQ_inter->SC_vars[key"]->GetValue<float>()
+    // DAQ_inter->sc_vars[key"]->GetValue<float>()
     
     std::string ret = "Changed voltages";
     return ret;
