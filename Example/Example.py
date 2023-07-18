@@ -193,7 +193,9 @@ if __name__ == "__main__":
     
     print("Making new DB entry")
     # no matching configuration entry was found. let's make one.
-    power_on = False
+    power_on.value = False  # IMPORTANT: when changing values of ctypes variables use '.value'
+                            # doing 'power_on = False' will change the type of the power_on variable
+                            # and may lead to errors when passed to later Get/Set calls!
     configuration.Set("power_on", power_on)
     configuration.Set("voltage_1", DAQ_inter.sc_vars["voltage_1"].GetValue['float']())
     configuration.Set("voltage_2", 4000)
@@ -273,7 +275,7 @@ if __name__ == "__main__":
       
       # if clicked, update our status indicator and reset the control buttons
       if DAQ_inter.sc_vars["Stop"].GetValue['bool']() or not running:
-        print("Got Quit signal")
+        print("Got stop signal")
         started = False
         DAQ_inter.sc_vars["Status"].SetValue("Stopped")
         DAQ_inter.sc_vars["Stop"].SetValue(False)
@@ -311,6 +313,7 @@ if __name__ == "__main__":
       ###########################################
       print("checking for updated controls")
       DAQ_inter.sc_vars["power_on"].GetValue(power_on)
+      #power_on = DAQ_inter.sc_vars["power_on"].GetValue['bool'](); # or this
       if not power_on:
         if DAQ_inter.sc_vars["voltage_1"].GetValue['bool']():
           DAQ_inter.sc_vars["voltage_1"].SetValue(0.0)
@@ -324,6 +327,7 @@ if __name__ == "__main__":
         
         # if the control value has changed, update the local variable holding last known value
         DAQ_inter.sc_vars["voltage_1"].GetValue(voltage_1)
+        print("voltage_1 change requested; new value is ",voltage_1)
         
         # and enact the change in hardware
         # [suitable code here]

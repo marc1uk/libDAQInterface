@@ -141,10 +141,11 @@ bool DAQInterface::GetConfig(std::string& json_data, int version, std::string de
     std::cerr<<"GetConfig error: "<<err<<std::endl;
     return false;
   }
-
-  json_data.replace(0,9,"");
-  json_data.replace(json_data.end()-2, json_data.end(),""); 
-
+  if(json_data.length()>11){
+    json_data.replace(0,9,"");
+    json_data.replace(json_data.end()-2, json_data.end(),"");
+  }
+  
   return true;
 
 }
