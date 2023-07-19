@@ -64,6 +64,7 @@ After following the normal installation steps, python support can therefore be a
 which will install a recent ROOT version (6.24 or 6.28, depending on your compiler) into `./Dependencies`, with the necessary components enabled.
 From there, you can run
 
+      source Setup.sh
       python3 Example/Example.py
 
 to run the example python client.
