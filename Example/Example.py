@@ -111,31 +111,31 @@ if __name__ == "__main__":
   # We can register controls associated with our service via the DAQ_inter.sc_vars.Add method
   # this takes a control name and type, as a minimum.
   # available types are: { BUTTON, VARIABLE, OPTIONS, COMMAND, INFO }
-  DAQ_inter.sc_vars.Add("Info",cppyy.gbl.SlowControlElementType(cppyy.gbl.INFO))
+  DAQ_inter.sc_vars.Add("Info",cppyy.gbl.INFO)
   
   # Use DAQ_inter.sc_vars["ControlName"] to access a SlowControlElement.
   # Use the SetValue method of a control to update its value displayed on the webpage
   DAQ_inter.sc_vars["Info"].SetValue(" hello this is an information message ,.!{}[]<>?/`~'@\" ")
   
   # Typical controls might include buttons for starting, stopping and quitting a service
-  DAQ_inter.sc_vars.Add("Start",cppyy.gbl.SlowControlElementType(cppyy.gbl.BUTTON))
+  DAQ_inter.sc_vars.Add("Start",cppyy.gbl.BUTTON)
   DAQ_inter.sc_vars["Start"].SetValue(False)
   
-  DAQ_inter.sc_vars.Add("Stop",cppyy.gbl.SlowControlElementType(cppyy.gbl.BUTTON))
+  DAQ_inter.sc_vars.Add("Stop",cppyy.gbl.BUTTON)
   DAQ_inter.sc_vars["Stop"].SetValue(False)
   
-  DAQ_inter.sc_vars.Add("Quit",cppyy.gbl.SlowControlElementType(cppyy.gbl.BUTTON))
+  DAQ_inter.sc_vars.Add("Quit",cppyy.gbl.BUTTON)
   DAQ_inter.sc_vars["Quit"].SetValue(False)
   
   # We can make a radio button control with the OPTIONS control type
-  DAQ_inter.sc_vars.Add("power_on",cppyy.gbl.SlowControlElementType(cppyy.gbl.OPTIONS))
+  DAQ_inter.sc_vars.Add("power_on",cppyy.gbl.OPTIONS)
   DAQ_inter.sc_vars["power_on"].AddOption("1")
   DAQ_inter.sc_vars["power_on"].AddOption("0")
   DAQ_inter.sc_vars["power_on"].SetValue("0")
   
   # we can add variable controls with the VARIABLE control type
   # this additionally takes a range and step size
-  DAQ_inter.sc_vars.Add("voltage_1", cppyy.gbl.SlowControlElementType(cppyy.gbl.VARIABLE))
+  DAQ_inter.sc_vars.Add("voltage_1", cppyy.gbl.VARIABLE)
   DAQ_inter.sc_vars["voltage_1"].SetMin(0)
   DAQ_inter.sc_vars["voltage_1"].SetMax(5000)
   DAQ_inter.sc_vars["voltage_1"].SetStep(0.1)
@@ -161,7 +161,7 @@ if __name__ == "__main__":
   # whenever a control value is changed. This enables us to act on changes when they happen
   # without the need to constantly poll the DAQInterface to identify when something changes.
   change_voltage_ref = automated_functions.change_voltage
-  DAQ_inter.sc_vars.Add("voltage_2", cppyy.gbl.SlowControlElementType(cppyy.gbl.VARIABLE), change_voltage_ref)
+  DAQ_inter.sc_vars.Add("voltage_2", cppyy.gbl.VARIABLE, change_voltage_ref)
   DAQ_inter.sc_vars["voltage_2"].SetMin(0)
   DAQ_inter.sc_vars["voltage_2"].SetMax(5000)
   DAQ_inter.sc_vars["voltage_2"].SetStep(10)

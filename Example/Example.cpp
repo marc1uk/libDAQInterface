@@ -89,38 +89,38 @@ int main(){
   //defining slow control values
   
   DAQ_inter.sc_vars["Status"]->SetValue("Ready"); 
-
-  DAQ_inter.sc_vars.Add("Info",SlowControlElementType(INFO));
+  
+  DAQ_inter.sc_vars.Add("Info",INFO);
   DAQ_inter.sc_vars["Info"]->SetValue(" hello this is an information message ,.!{}[]<>?/`~'@\" ");
- 
-  DAQ_inter.sc_vars.Add("Start",SlowControlElementType(BUTTON), std::bind(&AutomatedFunctions::start_func, automated_functions,  std::placeholders::_1));
+  
+  DAQ_inter.sc_vars.Add("Start",BUTTON, std::bind(&AutomatedFunctions::start_func, automated_functions,  std::placeholders::_1));
   DAQ_inter.sc_vars["Start"]->SetValue(false);
   
-  DAQ_inter.sc_vars.Add("Stop",SlowControlElementType(BUTTON));
+  DAQ_inter.sc_vars.Add("Stop",BUTTON);
   DAQ_inter.sc_vars["Stop"]->SetValue(false);
   
-  DAQ_inter.sc_vars.Add("Quit",SlowControlElementType(BUTTON));
+  DAQ_inter.sc_vars.Add("Quit",BUTTON);
   DAQ_inter.sc_vars["Quit"]->SetValue(false);
   
-  DAQ_inter.sc_vars.Add("power_on",SlowControlElementType(OPTIONS));
+  DAQ_inter.sc_vars.Add("power_on",OPTIONS);
   DAQ_inter.sc_vars["power_on"]->AddOption("1");
   DAQ_inter.sc_vars["power_on"]->AddOption("0");
   DAQ_inter.sc_vars["power_on"]->SetValue("0");
   
  
-  DAQ_inter.sc_vars.Add("voltage_1", SlowControlElementType(VARIABLE),  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions,  std::placeholders::_1));  //example variable with automated functions
+  DAQ_inter.sc_vars.Add("voltage_1", VARIABLE,  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions,  std::placeholders::_1));  //example variable with automated functions
   DAQ_inter.sc_vars["voltage_1"]->SetMin(0);
   DAQ_inter.sc_vars["voltage_1"]->SetMax(5000);
   DAQ_inter.sc_vars["voltage_1"]->SetStep(0.1);
   DAQ_inter.sc_vars["voltage_1"]->SetValue(3500.5);
   
-  DAQ_inter.sc_vars.Add("voltage_2", SlowControlElementType(VARIABLE)); //example variable with no automated function
+  DAQ_inter.sc_vars.Add("voltage_2", VARIABLE); //example variable with no automated function
   DAQ_inter.sc_vars["voltage_2"]->SetMin(0);
   DAQ_inter.sc_vars["voltage_2"]->SetMax(5000);
   DAQ_inter.sc_vars["voltage_2"]->SetStep(10);
   DAQ_inter.sc_vars["voltage_2"]->SetValue(4000);
   
-  DAQ_inter.sc_vars.Add("voltage_3", SlowControlElementType(VARIABLE),  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions,  std::placeholders::_1));
+  DAQ_inter.sc_vars.Add("voltage_3", VARIABLE,  std::bind(&AutomatedFunctions::voltage_change_func, automated_functions,  std::placeholders::_1));
   DAQ_inter.sc_vars["voltage_3"]->SetMin(0);
   DAQ_inter.sc_vars["voltage_3"]->SetMax(5000);
   DAQ_inter.sc_vars["voltage_3"]->SetStep(0.1);
