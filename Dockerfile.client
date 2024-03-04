@@ -1,0 +1,10 @@
+FROM web_base
+
+# skip as bind mounted
+#RUN cd / \
+#    && git clone https://github.com/ToolDAQ/libDAQInterface.git /web \
+#    && . Setup.sh \
+#    && make clean \
+#    && make
+
+CMD /bin/bash -c "cd /web && . Setup.sh && ./Example"
