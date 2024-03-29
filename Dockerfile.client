@@ -1,10 +1,5 @@
 FROM web_base
 
-RUN cd / \
-    && git clone https://github.com/ToolDAQ/libDAQInterface.git /web \
-    && . Setup.sh \
-    && make clean \
-    && make
 
 RUN cd /opt/ \
     wget https://root.cern/download/root_v6.26.04.source.tar.gz \
@@ -21,5 +16,13 @@ RUN cd /opt/ \
     && rm -rf root_v6.26.04_src \
     && rm -rf root_v6.26.04_build \
     && echo '. ${Dependencies}/root_v6.26.04/bin/thisroot.sh' >> /web/Setup.sh
+
+RUN cd / \
+    && git clone https://github.com/marc1uk/libDAQInterface.git -b v3 web \
+    && cd /web \
+    && ln -s /opt ./Dependencies \
+    && chmod a+x  ./Setup.sh \
+    && source ./Setup.sh \
+    && make
 
 CMD /bin/bash -c "cd /web && . Setup.sh && ./Example"

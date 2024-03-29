@@ -45,7 +45,7 @@ bool DAQInterface::Init(std::string name, std::string client_configfile, std::st
 
 // Send a command over zmq socket and get multiple results (e.g. db query returning multiple rows)
 bool DAQInterface::SendCommand(const std::string& topic, const std::string& cmd_string, std::vector<std::string>* results, std::string* err, const unsigned int timeout){
-  std::cout<<"DAQInterface sending "<<topic<<" command: '"<<cmd_string<<"'"<<std::endl;
+  //std::cout<<"DAQInterface sending "<<topic<<" command: '"<<cmd_string<<"'"<<std::endl;
   
   if(results) results->clear();
   
@@ -62,7 +62,7 @@ bool DAQInterface::SendCommand(const std::string& topic, const std::string& cmd_
 
 // Send a command over zmq socket and get a single result (e.g. db command returning a single row)
 bool DAQInterface::SendCommand(const std::string& topic, const std::string& cmd_string, std::string* result, std::string* err, const unsigned int timeout){
-  std::cout<<"DAQInterface sending "<<topic<<" command: '"<<cmd_string<<"'"<<std::endl;
+  //std::cout<<"DAQInterface sending "<<topic<<" command: '"<<cmd_string<<"'"<<std::endl;
   
   if(result) *result="";
   
@@ -72,7 +72,7 @@ bool DAQInterface::SendCommand(const std::string& topic, const std::string& cmd_
 
 // Send a multicast command and get no result (uses UDP, not guaranteed delivery)
 bool DAQInterface::SendCommand(const std::string& cmd_string, std::string* err){
-  std::cout<<"DAQInterface sending multicast command '"<<cmd_string<<"'"<<std::endl;
+  //std::cout<<"DAQInterface sending multicast command '"<<cmd_string<<"'"<<std::endl;
   
   return m_scclient.SendMulticast(cmd_string, err);
   
