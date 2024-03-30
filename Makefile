@@ -25,8 +25,8 @@ Example/Example: Example/Example.cpp
 	g++ -g -O3  -Wpedantic -std=c++11 Example/Example.cpp -o Example/Example -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
 
 lib/libDAQInterfaceClassDict.so: include/DAQInterface.h include/DAQInterfaceLinkdef.h
-	rootcling -f src/DAQInterfaceClassDict.cpp -c -p -rmf lib/libDAQInterfaceClassDict.rootmap $^ -I include/ $(ToolFrameworkInclude) $(ToolDAQInclude) $(BoostInclude) $(ZMQInclude)
-	g++ -shared -fPIC src/DAQInterfaceClassDict.cpp -o $@ -I `root-config --incdir` -I include/ $(ToolFrameworkInclude) $(ToolDAQInclude) $(BoostInclude) $(ZMQInclude) -L lib -lDAQInterface `root-config --libs`
+	rootcling -f src/DAQInterfaceClassDict.cpp -c -p -rmf lib/libDAQInterfaceClassDict.rootmap $^ -I ./include/ $(ToolFrameworkInclude) $(ToolDAQInclude) $(BoostInclude) $(ZMQInclude)
+	g++ -shared -fPIC src/DAQInterfaceClassDict.cpp -o $@ -I `root-config --incdir` -I ./include/ $(ToolFrameworkInclude) $(ToolDAQInclude) $(BoostInclude) $(ZMQInclude) -L lib -lDAQInterface `root-config --libs`
 	cp src/DAQInterfaceClassDict_rdict.pcm lib/
 
 RemoteControl: Dependencies/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp
