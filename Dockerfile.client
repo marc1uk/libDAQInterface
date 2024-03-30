@@ -27,4 +27,4 @@ RUN cd / \
     && make
 
 
-CMD /bin/bash -c "cd /web && . Setup.sh && ./Example"
+CMD /bin/bash -c "cd /web && . Setup.sh && ./Example/Example"
