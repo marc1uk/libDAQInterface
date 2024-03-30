@@ -24,10 +24,6 @@ RUN cd / \
     && chmod a+x  ./Setup.sh \
     && source ./Setup.sh \
     && make clean \
-    && make lib/libDAQInterface.so \
-    && make Win_Mac_translation \
-    && make Example/Example \
-    && make RemoteControl \
     && make
 
 
