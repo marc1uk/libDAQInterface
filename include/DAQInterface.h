@@ -34,9 +34,6 @@ class DAQInterface{
   ~DAQInterface();
   bool Init(std::string name, std::string client_configfile, std::string db_name);
   
-  bool SendCommand(const std::string& topic, const std::string& cmd_string, std::vector<std::string>* results=nullptr, std::string* err=nullptr,  const unsigned int timeout=300);
-  bool SendCommand(const std::string& topic, const std::string& cmd_string, std::string* result=nullptr, std::string* err=nullptr, const unsigned int timeout=300);
-  bool SendCommand(const std::string& cmd_string, std::string* err=nullptr);
   
   bool SQLQuery(const std::string& database, const std::string& query, std::vector<std::string>* responses=nullptr, const unsigned int timeout=300);
   bool SQLQuery(const std::string& database, const std::string& query, std::string* response=nullptr, const unsigned int timeout=300);
@@ -49,8 +46,6 @@ class DAQInterface{
   bool SendConfig(const std::string& json_data, const std::string& author, const std::string& description, const std::string& device="", unsigned int timestamp=0, int* version=nullptr, const unsigned int timeout=300);
   bool GetConfig(std::string& json_data, int version=-1, const std::string& device="", const unsigned int timeout=300);
   
-  std::string escape_json(std::string s);
-
   SlowControlCollection* GetSlowControlCollection();
   SlowControlElement* GetSlowControlVariable(std::string key);
   bool AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> function=nullptr);
@@ -68,6 +63,15 @@ class DAQInterface{
   }
 
   SlowControlCollection sc_vars;
+
+private:
+
+  bool SendCommand(const std::string& topic, const std::string& cmd_string, std::vector<std::string>* results=nullptr, std::string* err=nullptr,  const unsigned int timeout=300);
+  bool SendCommand(const std::string& topic, const std::string& cmd_string, std::string* result=nullptr, std::string* err=nullptr, const unsigned int timeout=300);
+  bool SendCommand(const std::string& cmd_string, std::string* err=nullptr);
+
+  std::string escape_json(std::string s);
+
   
 };
 

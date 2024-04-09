@@ -54,13 +54,13 @@ if __name__ == "__main__":
   
   # configuration
   device_name = "my_device"
-  PGClient_configfile = "./PGClientConfig"
+  Interface_configfile = "./InterfaceConfig"
   database_name = "daq"
   
   print("Initialising daqinterface")
   # initialise DAQInterface
   DAQ_inter = DAQInterface()
-  DAQ_inter.Init(device_name, PGClient_configfile, database_name)
+  DAQ_inter.Init(device_name, Interface_configfile, database_name)
   automated_functions = AutomatedFunctions(DAQ_inter, device_name)
   
   # set initial status so we can track when the service is ready

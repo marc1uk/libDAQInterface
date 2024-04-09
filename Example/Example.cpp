@@ -58,16 +58,16 @@ int main(){
   ////////////////////////////// setup /////////////////////////////////
 
   std::string device_name = "my_device"; //name of my device
-  std::string PGClient_configfile = "./PGClientConfig";
+  std::string Interface_configfile = "./InterfaceConfig";
   std::string database_name = "daq";
 
   DAQInterface DAQ_inter;
-  DAQ_inter.Init(device_name, PGClient_configfile, database_name);  // initialiing DAQInterface
+  DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface
 
   AutomatedFunctions automated_functions(&DAQ_inter);
 
   //  DAQInterface* DAQ_inter = &AutomatedFunctions::DAQ_inter;  // making local pointer of static DAQInterface
-  // DAQ_inter.Init(device_name, PGClient_configfile, database_name);  // initialiing DAQInterface 
+  // DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface 
 
   //////////////////////////////////////////////////////////////////////
 
