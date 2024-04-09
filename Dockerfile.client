@@ -1,4 +1,4 @@
-FROM web_base
+FROM tooldaq/web_base
 
 
 RUN cd /opt/ \
@@ -17,7 +17,7 @@ RUN cd /opt/ \
     && rm -rf root_v6.26.04_build
     
 RUN cd / \
-    && git clone https://github.com/marc1uk/libDAQInterface.git -b v3 web \
+    && git clone https://github.com/ToolDAQ/libDAQInterface.git web \
     && cd /web \
     && ln -s /opt ./Dependencies \
     && echo '. ${Dependencies}/root_v6.26.04/bin/thisroot.sh' >> /web/Setup.sh \
