@@ -14,7 +14,7 @@ ToolFrameworkInclude= -I $(Dependencies)/ToolFrameworkCore/include
 
 sources= $(filter-out  %DAQInterfaceClassDict.cpp, $(wildcard src/*.cpp))
 
-all: lib/libDAQInterface.so Win_Mac_translation Example/Example RemoteControl lib/libDAQInterfaceClassDict.so
+all: lib/libDAQInterface.so Win_Mac_translation Example/Example RemoteControl
 
 lib/libDAQInterface.so: $(sources)
 	g++ -g -O3 -fPIC  -Wpedantic -std=c++11 -shared $(sources) -I include -o lib/libDAQInterface.so -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
