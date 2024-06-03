@@ -1,4 +1,6 @@
 #include <DAQInterface.h>
+#include <regex>
+#include <regex_helpers.h>
 
 using namespace ToolFramework;
 
@@ -103,7 +105,8 @@ bool DAQInterface::SendAlarm(const std::string& message, unsigned int level, con
   }
   
   // also record it to the logging socket
-  cmd_string = "{\"time\":"+std::to_string(timestamp)
+  cmd_string = std::string{"{ \"topic\":\"logging\""}
+             + ",\"time\":"+std::to_string(timestamp)
              + ",\"device\":\""+escape_json(name)+"\""
              + ",\"severity\":0"
              + ",\"message\":\"" + escape_json(message) + "\"}";
@@ -248,6 +251,119 @@ bool DAQInterface::GetConfig(std::string& json_data, int version, const std::str
   
 }
 
+bool DAQInterface::GetROOTplot(const std::string& plot_name, int version, std::string& draw_option, std::string& json_data, unsigned int* timestamp, const unsigned int timeout){
+  
+  std::string cmd_string = "{ \"plot_name\":\""+escape_json(plot_name) + "\""
+                         + ", \"version\":" + std::to_string(version)+ "}";
+  
+  std::string err="";
+  std::string response;
+  if(!SendCommand("R_ROOTPLOT", cmd_string, &response, &err, timeout)){
+    std::cerr<<"GetROOTplot error: "<<err<<std::endl;
+    json_data = err;
+    return false;
+  }
+  
+  // response format '{"draw_opts":"<options>", "timestamp":<value>, "data":"<contents>"}'
+  // parse response
+  int verbose=0;
+  // XXX NOTE: regex escapes \n etc will need to be doubled: \\n!
+  // https://cs.brown.edu/~jwicks/boost/libs/regex/doc/introduction.htmls
+  std::vector<std::vector<std::string>>* output_submatches;
+  std::regex theexpression;
+  std::string pattern="[^\"]+\"draw_opts\"[ ]*:[ ]*\"([^\"]+)\",[ ]*\"timestamp\"[ ]*:[ ]*([0-9]+), \"data\"[ ]*:[ ]*\"(.*)";
+  if(verbose) std::cout<<"searching for regex submatches with pattern "<<pattern<<std::endl;
+  try{
+    theexpression.assign(pattern.c_str(),std::regex::extended|std::regex_constants::icase);
+    // TODO should we use std::regex::perl? boost had issues with extended
+  } catch (std::regex_error& e){
+    if(regex_err_strings.count(e.code())){
+      std::cerr<<regex_err_strings.at(e.code())<<std::endl;
+    } else {
+      std::cerr<<"unknown std::refex_error code: "<<e.code()<<std::endl;
+    }
+    return false;
+  } catch(std::exception& e){
+    std::cerr<<"Error: GetROOTplot regex matching threw: "<<e.what()<<std::endl;
+    return false;
+  } catch(...){
+    std::cerr<<"Error: GetROOTplot unhandled regex matching exception"<<std::endl;
+    return false;
+  }
+  if(verbose) std::cout<<"made the expression..."<<std::endl;
+  // declare something to catch the submatches
+  std::smatch submatches;
+  if(verbose) std::cout<<"doing regex match on response '"<<response<<"'"<<std::endl;
+  // TODO use 'std::regex_search' to allow matching of incomplete sections ?
+  // which can be retrieved via smatch.prefix and .suffix
+  try{
+    std::regex_match(response, submatches, theexpression);
+  } catch(const std::out_of_range& oor){
+    std::cerr<<"Error: GetROOTplot regex matching threw out of range error"<<std::endl;
+    return false;
+  } catch (std::regex_error& e){
+    if(regex_err_strings.count(e.code())){
+      std::cerr<<regex_err_strings.at(e.code())<<std::endl;
+    } else {
+      std::cerr<<"unknown std::refex_error?? code: "<<e.code()<<std::endl;
+    }
+    return false;
+  } catch(std::exception& e){
+    std::cerr<<"Error: GetROOTplot regex matching threw: "<<e.what()<<std::endl;
+    return false;
+  } catch(...){
+    std::cerr<<"Error: GetROOTplot unhandled regex matching exception"<<std::endl;
+    return false;
+  }
+  std::cout<<"checking validity of match"<<std::endl;
+  if(not submatches.ready()){
+    std::cerr<<"Error: GetROOTplot submatches not ready after match"<<std::endl;
+    return false;
+  }
+  if(submatches.empty()){
+    std::cerr<<"Error: GetROOTplot extraction found no submatches!"<<std::endl;
+    return false;
+  }
+  if(submatches.size()<4){
+    std::cerr<<"Error: GetROOTplot extraction found too few matches ("<<submatches.size()<<"/4)"<<std::endl;
+    return false;
+  }
+  
+  // first submatch (index 0) is the whole match
+  std::string draw_opts = submatches.str(1);
+  if(timestamp!=nullptr){
+    try {
+      *timestamp = std::stoi(submatches.str(2));
+    } catch( ... ){
+      std::cerr<<"Error: GetROOTplot extraction got invalid timestamp '"<<submatches.str(1)<<"'"<<std::endl;
+      *timestamp=0;
+    }
+  }
+  json_data = submatches.str(3);
+  // for simplicity the plot data match was open-ended, which would have captured
+  // the json closing brace and quotation; pop those off
+  if(json_data.size()>2){
+    json_data.pop_back(); json_data.back();
+  } else {
+    std::cerr<<"Warning: GetROOTplot extraction get no plot data"<<std::endl;
+    return false;
+  }
+  if(verbose) std::cout<<"extracted successfully"<<std::endl;
+  /*
+  std::cout<<"timestamp: "<<timestamp<<"\n"
+           <<"draw opts: "<<draw_opts<<"\n"
+           <<"json data: '"<<json_data<<"'"<<std::endl;
+  */
+  
+  return true;
+  
+}
+
+bool DAQInterface::GetPlot(){
+  // placeholder for evgenii
+  return true;
+}
+
 bool DAQInterface::SQLQuery(const std::string& database, const std::string& query, std::vector<std::string>* responses, const unsigned int timeout){
   
   if(responses) responses->clear();
@@ -300,7 +416,8 @@ bool DAQInterface::SendLog(const std::string& message, unsigned int severity, co
   
   const std::string& name = (device=="") ? m_name : device;
   
-  std::string cmd_string = "{\"time\":"+std::to_string(timestamp)
+  std::string cmd_string = std::string{"{ \"topic\":\"logging\""}
+                         + ",\"time\":"+std::to_string(timestamp)
                          + ",\"device\":\""+escape_json(name)+"\""
                          + ",\"severity\":"+std::to_string(severity)
                          + ",\"message\":\"" + escape_json(message) + "\"}";
@@ -320,7 +437,8 @@ bool DAQInterface::SendMonitoringData(const std::string& json_data, const std::s
   
   const std::string& name = (device=="") ? m_name : device;
   
-  std::string cmd_string = "{ \"time\":"+std::to_string(timestamp)
+  std::string cmd_string = std::string{"{ \"topic\":\"monitoring\""}
+                         + ", \"time\":"+std::to_string(timestamp)
                          + ", \"device\":\""+escape_json(name)+"\""
                          + ", \"data\":\""+escape_json(json_data)+"\" }";
   
@@ -333,6 +451,49 @@ bool DAQInterface::SendMonitoringData(const std::string& json_data, const std::s
   
   return true;
   
+}
+
+bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_opts, const std::string& json_data, int* version, const unsigned int timestamp){
+  
+  std::string cmd_string = std::string{"{ \"topic\":\"rootplot\""}
+                         + ", \"time\":\""+std::to_string(timestamp)+"\""
+                         + ", \"plot_name\":"+escape_json(plot_name)
+                         + ", \"draw_opts\":\""+escape_json(draw_opts)+"\""
+                         + ", \"data\":\""+escape_json(json_data)+"\" }";
+  
+  std::string response;
+  std::string err="";
+  
+  if(!SendCommand(cmd_string, &err)){
+    std::cerr<<"SendROOTplot error: "<<err<<std::endl;
+    return false;
+  }
+  
+  // response is json with the version number of the created config entry
+  // e.g. '{"version":3}'. check this is what we got, as validation.
+  if(response.length()>12){
+    response.replace(0,11,"");
+    response.replace(response.end()-1, response.end(),"");
+    try {
+      if(version) *version = std::stoi(response);
+    } catch (...){
+      std::cerr<<"SendROOTplot error: invalid response '"<<response<<"'"<<std::endl;
+      return false;
+    }
+  } else {
+    std::cerr<<"SendROOTplot error: invalid response: '"<<response<<"'"<<std::endl;
+    return false;
+  }
+  
+  return true;
+  
+}
+
+bool DAQInterface::SendPlot(){
+  
+  // placeholder for evgenii
+  
+  return true;
 }
 
 // ===========================================================================
@@ -392,7 +553,7 @@ std::string DAQInterface::GetDeviceName(){
   
 }
 
-std::string DAQInterface::escape_json(std::string s){
+std::string DAQInterface::escape_json(const std::string& s){
   return s;
   
   // https://stackoverflow.com/a/27516892
@@ -403,24 +564,25 @@ std::string DAQInterface::escape_json(std::string s){
   // e.g. '\n' -> line feed, or 0x5C 0x6E -> 0x0A, which alters the user's string.
   
   size_t pos=0;
+  std::string ss = s;
   do {
-    pos = s.find("\\",pos);
+    pos = ss.find("\\",pos);
     if(pos!=std::string::npos){
-      s.insert(pos,"\\");
+      ss.insert(pos,"\\");
       pos+=2;
     }
   } while(pos!=std::string::npos);
   
   pos=0;
   do {
-    pos = s.find('"',pos);
+    pos = ss.find('"',pos);
     if(pos!=std::string::npos){
-      s.insert(pos,"\\");
+      ss.insert(pos,"\\");
       pos+=2;
     }
   } while(pos!=std::string::npos);
   
-  return s;
+  return ss;
 }
 
 
