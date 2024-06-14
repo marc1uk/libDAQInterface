@@ -1,6 +1,4 @@
 #include <DAQInterface.h>
-#include <regex>
-#include <regex_helpers.h>
 
 using namespace ToolFramework;
 
