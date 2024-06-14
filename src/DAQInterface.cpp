@@ -139,10 +139,10 @@ bool DAQInterface::SendCalibrationData(const std::string& json_data, const std::
   }
   
   // response is json with the version number of the created config entry
-  // e.g. '{"version":3}'. check this is what we got, as validation.
-  if(response.length()>12){
-    response.replace(0,11,"");
-    response.replace(response.end()-1, response.end(),"");
+  // e.g. '{"version":"3"}'. check this is what we got, as validation.
+  if(response.length()>14){
+    response.replace(0,12,"");
+    response.replace(response.end()-2, response.end(),"");
     try {
       if(version) *version = std::stoi(response);
     } catch (...){
@@ -179,10 +179,10 @@ bool DAQInterface::SendConfig(const std::string& json_data, const std::string& a
   }
   
   // response is json with the version number of the created config entry
-  // e.g. '{"version":3}'. check this is what we got, as validation.
-  if(response.length()>12){
-    response.replace(0,11,"");
-    response.replace(response.end()-1, response.end(),"");
+  // e.g. '{"version":"3"}'. check this is what we got, as validation.
+  if(response.length()>14){
+    response.replace(0,12,"");
+    response.replace(response.end()-2, response.end(),"");
     try {
       if(version) *version = std::stoi(response);
     } catch (...){
@@ -251,7 +251,7 @@ bool DAQInterface::GetConfig(std::string& json_data, int version, const std::str
   
 }
 
-bool DAQInterface::GetROOTplot(const std::string& plot_name, int version, std::string& draw_option, std::string& json_data, unsigned int* timestamp, const unsigned int timeout){
+bool DAQInterface::GetROOTplot(const std::string& plot_name, int& version, std::string& draw_options, std::string& json_data, std::string* timestamp, const unsigned int timeout){
   
   std::string cmd_string = "{ \"plot_name\":\""+escape_json(plot_name) + "\""
                          + ", \"version\":" + std::to_string(version)+ "}";
@@ -264,94 +264,43 @@ bool DAQInterface::GetROOTplot(const std::string& plot_name, int version, std::s
     return false;
   }
   
-  // response format '{"draw_opts":"<options>", "timestamp":<value>, "data":"<contents>"}'
-  // parse response
-  int verbose=0;
-  // XXX NOTE: regex escapes \n etc will need to be doubled: \\n!
-  // https://cs.brown.edu/~jwicks/boost/libs/regex/doc/introduction.htmls
-  std::vector<std::vector<std::string>>* output_submatches;
-  std::regex theexpression;
-  std::string pattern="[^\"]+\"draw_opts\"[ ]*:[ ]*\"([^\"]+)\",[ ]*\"timestamp\"[ ]*:[ ]*([0-9]+), \"data\"[ ]*:[ ]*\"(.*)";
-  if(verbose) std::cout<<"searching for regex submatches with pattern "<<pattern<<std::endl;
-  try{
-    theexpression.assign(pattern.c_str(),std::regex::extended|std::regex_constants::icase);
-    // TODO should we use std::regex::perl? boost had issues with extended
-  } catch (std::regex_error& e){
-    if(regex_err_strings.count(e.code())){
-      std::cerr<<regex_err_strings.at(e.code())<<std::endl;
-    } else {
-      std::cerr<<"unknown std::refex_error code: "<<e.code()<<std::endl;
-    }
-    return false;
-  } catch(std::exception& e){
-    std::cerr<<"Error: GetROOTplot regex matching threw: "<<e.what()<<std::endl;
-    return false;
-  } catch(...){
-    std::cerr<<"Error: GetROOTplot unhandled regex matching exception"<<std::endl;
-    return false;
-  }
-  if(verbose) std::cout<<"made the expression..."<<std::endl;
-  // declare something to catch the submatches
-  std::smatch submatches;
-  if(verbose) std::cout<<"doing regex match on response '"<<response<<"'"<<std::endl;
-  // TODO use 'std::regex_search' to allow matching of incomplete sections ?
-  // which can be retrieved via smatch.prefix and .suffix
-  try{
-    std::regex_match(response, submatches, theexpression);
-  } catch(const std::out_of_range& oor){
-    std::cerr<<"Error: GetROOTplot regex matching threw out of range error"<<std::endl;
-    return false;
-  } catch (std::regex_error& e){
-    if(regex_err_strings.count(e.code())){
-      std::cerr<<regex_err_strings.at(e.code())<<std::endl;
-    } else {
-      std::cerr<<"unknown std::refex_error?? code: "<<e.code()<<std::endl;
-    }
-    return false;
-  } catch(std::exception& e){
-    std::cerr<<"Error: GetROOTplot regex matching threw: "<<e.what()<<std::endl;
-    return false;
-  } catch(...){
-    std::cerr<<"Error: GetROOTplot unhandled regex matching exception"<<std::endl;
-    return false;
-  }
-  std::cout<<"checking validity of match"<<std::endl;
-  if(not submatches.ready()){
-    std::cerr<<"Error: GetROOTplot submatches not ready after match"<<std::endl;
-    return false;
-  }
-  if(submatches.empty()){
-    std::cerr<<"Error: GetROOTplot extraction found no submatches!"<<std::endl;
-    return false;
-  }
-  if(submatches.size()<4){
-    std::cerr<<"Error: GetROOTplot extraction found too few matches ("<<submatches.size()<<"/4)"<<std::endl;
+  if(response.empty()){
+    std::cout<<"GetROOTplot error: empty response, "<<err<<std::endl;
+    json_data = err;
     return false;
   }
   
-  // first submatch (index 0) is the whole match
-  std::string draw_opts = submatches.str(1);
-  if(timestamp!=nullptr){
-    try {
-      *timestamp = std::stoi(submatches.str(2));
-    } catch( ... ){
-      std::cerr<<"Error: GetROOTplot extraction got invalid timestamp '"<<submatches.str(1)<<"'"<<std::endl;
-      *timestamp=0;
-    }
+  // response format '{"draw_options":"<options>", "timestamp":<value>, "version": <value>, "data":"<contents>"}'
+  size_t pos1=0, pos2=0;
+  std::string key;
+  std::map<std::string,std::string> vals;
+  while(true){
+    pos1=response.find('"',pos2);
+    if(pos1==std::string::npos) break;
+    pos2=response.find('"',++pos1);
+    if(pos2==std::string::npos) break;
+    std::string str = response.substr(pos1,(pos2-pos1));
+    ++pos2;
+    if(key.empty()){ key = str; }
+    else if(key=="data"){ break; }
+    else { vals[key] = str; key=""; }
   }
-  json_data = submatches.str(3);
-  // for simplicity the plot data match was open-ended, which would have captured
-  // the json closing brace and quotation; pop those off
-  if(json_data.size()>2){
-    json_data.pop_back(); json_data.back();
-  } else {
-    std::cerr<<"Warning: GetROOTplot extraction get no plot data"<<std::endl;
+  vals[key] = response.substr(pos1,response.find_last_of('"')-pos1);
+  
+  try{
+    draw_options = vals["draw_options"];
+    if(timestamp) *timestamp = vals["timestamp"];
+    version = std::stoi(vals["version"]);
+    json_data = vals["data"];
+  } catch(...){
+    std::cerr<<"GetROOTplot error: failed to parse response '"<<response<<"'"<<std::endl;
+    json_data = "Parse error";
     return false;
   }
-  if(verbose) std::cout<<"extracted successfully"<<std::endl;
+  
   /*
   std::cout<<"timestamp: "<<timestamp<<"\n"
-           <<"draw opts: "<<draw_opts<<"\n"
+           <<"draw opts: "<<draw_options<<"\n"
            <<"json data: '"<<json_data<<"'"<<std::endl;
   */
   
@@ -453,27 +402,33 @@ bool DAQInterface::SendMonitoringData(const std::string& json_data, const std::s
   
 }
 
-bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_opts, const std::string& json_data, int* version, const unsigned int timestamp){
+// wrapper to send a root plot either to a temporary table or a persistent one
+bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, bool persistent, int* version, const unsigned int timestamp, const unsigned int timeout){
+  if(!persistent) return SendTemporaryROOTplot(plot_name, draw_options, json_data, version, timestamp);
+  return SendPersistentROOTplot(plot_name, draw_options, json_data, version, timestamp, timeout);
+}
+
+// send to persistent table over TCP
+bool DAQInterface::SendPersistentROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const unsigned int timestamp, const unsigned int timeout){
   
-  std::string cmd_string = std::string{"{ \"topic\":\"rootplot\""}
-                         + ", \"time\":\""+std::to_string(timestamp)+"\""
-                         + ", \"plot_name\":"+escape_json(plot_name)
-                         + ", \"draw_opts\":\""+escape_json(draw_opts)+"\""
+  std::string cmd_string = "{ \"time\":"+std::to_string(timestamp)
+                         + ", \"plot_name\":\""+escape_json(plot_name)+"\""
+                         + ", \"draw_options\":\""+escape_json(draw_options)+"\""
                          + ", \"data\":\""+escape_json(json_data)+"\" }";
   
-  std::string response;
   std::string err="";
+  std::string response="";
   
-  if(!SendCommand(cmd_string, &err)){
+  if(!SendCommand("W_ROOTPLOT", cmd_string, &response, &err, timeout)){
     std::cerr<<"SendROOTplot error: "<<err<<std::endl;
     return false;
   }
   
-  // response is json with the version number of the created config entry
-  // e.g. '{"version":3}'. check this is what we got, as validation.
-  if(response.length()>12){
-    response.replace(0,11,"");
-    response.replace(response.end()-1, response.end(),"");
+  // response is json with the version number of the created plot entry
+  // e.g. '{"version":"3"}'. check this is what we got, as validation.
+  if(response.length()>14){
+    response.replace(0,12,"");
+    response.replace(response.end()-2, response.end(),"");
     try {
       if(version) *version = std::stoi(response);
     } catch (...){
@@ -482,6 +437,26 @@ bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string&
     }
   } else {
     std::cerr<<"SendROOTplot error: invalid response: '"<<response<<"'"<<std::endl;
+    return false;
+  }
+  
+  return true;
+  
+}
+
+// send to temporary table over multicast
+bool DAQInterface::SendTemporaryROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const unsigned int timestamp){
+  
+  std::string cmd_string = std::string{"{ \"topic\":\"rootplot\""}
+                         + ", \"time\":"+std::to_string(timestamp)
+                         + ", \"plot_name\":\""+escape_json(plot_name)+"\""
+                         + ", \"draw_options\":\""+escape_json(draw_options)+"\""
+                         + ", \"data\":\""+escape_json(json_data)+"\" }";
+  
+  std::string err="";
+  
+  if(!SendCommand(cmd_string, &err)){
+    std::cerr<<"SendROOTplot error: "<<err<<std::endl;
     return false;
   }
   

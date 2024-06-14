@@ -455,7 +455,7 @@ bool SlowControlClient::SendCommand(const std::string& topic, const std::string&
 		} else {
 			// timed out
 			std::string errmsg="Timed out after waiting "+std::to_string(timeout)+"ms for response "
-			                   "from read command '"+command+"'";
+			                   "from command '"+command+"'";
 			if(verbosity>3) std::cerr<<errmsg<<std::endl;
 			if(err) *err=errmsg;
 			//std::cout<<"SendCommand returning false"<<std::endl;
