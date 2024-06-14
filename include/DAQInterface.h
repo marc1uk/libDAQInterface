@@ -45,8 +45,10 @@ class DAQInterface{
   bool GetCalibrationData(std::string& json_data, int version=-1, const std::string& device="", const unsigned int timeout=300);
   bool SendConfig(const std::string& json_data, const std::string& author, const std::string& description, const std::string& device="", unsigned int timestamp=0, int* version=nullptr, const unsigned int timeout=300);
   bool GetConfig(std::string& json_data, int version=-1, const std::string& device="", const unsigned int timeout=300);
-  bool SendROOTplot(const std::string& plot_name, const std::string& draw_opts, const std::string& json_data, int* version=nullptr, const unsigned int timestamp=0);
-  bool GetROOTplot(const std::string& plot_name, int version, std::string& draw_option, std::string& json_data, unsigned int* timestamp=nullptr, const unsigned int timeout=300);
+  bool SendROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, bool persistent=false, int* version=nullptr, const unsigned int timestamp=0, const unsigned int timeout=300);
+  bool SendTemporaryROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version=nullptr, const unsigned int timestamp=0);
+  bool SendPersistentROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version=nullptr, const unsigned int timestamp=0, const unsigned int timeout=300);
+  bool GetROOTplot(const std::string& plot_name, int& version, std::string& draw_option, std::string& json_data, std::string* timestamp=nullptr, const unsigned int timeout=300);
   bool SendPlot();
   bool GetPlot();
   
