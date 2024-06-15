@@ -44,4 +44,4 @@ RemoteControl: Dependencies/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp
 	g++ -O3  -Wpedantic -std=c++11 Dependencies/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp -o RemoteControl  -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
 
 clean:
-	rm -f lib/libDAQInterface.so RemoteControl Win_Mac_translation Example/Example
+	rm -f lib/libDAQInterface.so RemoteControl Win_Mac_translation Example/Example Example/Example_root

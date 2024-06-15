@@ -14,7 +14,7 @@
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/progress.hpp>
-#include <SlowControlClient.h>
+#include <ServicesBackend.h>
 
 namespace ToolFramework {
 
@@ -24,7 +24,7 @@ class DAQInterface{
 
   zmq::context_t m_context;
   ServiceDiscovery* mp_SD;
-  SlowControlClient m_scclient;
+  ServicesBackend m_scclient;
   std::string m_dbname;
   std::string m_name;
 
