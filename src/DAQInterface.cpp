@@ -2,11 +2,18 @@
 
 using namespace ToolFramework;
 
-DAQInterface::DAQInterface(){
+DAQInterface::DAQInterface(zmq::context_t* context_in){
   
-  sc_vars.InitThreadedReceiver(&m_context, 88888, 100, false);
+  if(context_in){
+    m_context = context_in;
+    free_context = false; // we have been given this context; do not handle its cleanup
+  } else {
+    m_context = new zmq::context_t{};
+    free_context = true;  // we made this context. delete it in our destructor.
+  }
+  sc_vars.InitThreadedReceiver(m_context, 88888, 100, false);
   
-  m_scclient.SetUp(&m_context);
+  m_scclient.SetUp(m_context);
   
 }
  
@@ -16,6 +23,9 @@ DAQInterface::~DAQInterface(){
   sc_vars.Clear();
   delete mp_SD;
   mp_SD=0;
+  usleep(1000000); // wait for any zmq threads to finish
+  if(free_context) delete m_context;
+  m_context=nullptr;
   
 }
 
@@ -24,7 +34,7 @@ bool DAQInterface::Init(std::string name, std::string client_configfile, std::st
   m_name=name;
   m_dbname=db_name;
   
-  mp_SD = new ServiceDiscovery(true, false, 88888, "239.192.1.1", 5000, &m_context, boost::uuids::random_generator()(), name, 5, 60);
+  mp_SD = new ServiceDiscovery(true, false, 88888, "239.192.1.1", 5000, m_context, boost::uuids::random_generator()(), name, 5, 60);
    
   if(!m_scclient.Initialise(client_configfile)){
     std::cerr<<"error initialising slowcontrol client"<<std::endl;

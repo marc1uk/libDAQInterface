@@ -22,7 +22,8 @@ class DAQInterface{
 
  private:
 
-  zmq::context_t m_context;
+  zmq::context_t* m_context=nullptr;
+  bool free_context=false;
   ServiceDiscovery* mp_SD;
   ServicesBackend m_scclient;
   std::string m_dbname;
@@ -30,7 +31,7 @@ class DAQInterface{
 
  public:
 
-  DAQInterface();
+  DAQInterface(zmq::context_t* context_in=nullptr);
   ~DAQInterface();
   bool Init(std::string name, std::string client_configfile, std::string db_name);
   
