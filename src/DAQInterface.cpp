@@ -369,6 +369,11 @@ bool DAQInterface::SendLog(const std::string& message, unsigned int severity, co
                          + ",\"severity\":"+std::to_string(severity)
                          + ",\"message\":\"" + escape_json(message) + "\"}";
   
+  if(cmd_string.length()>655355){
+    std::cerr<<"Logging message is too long! Maximum length may be 655355 bytes"<<std::endl;
+    return false;
+  }
+  
   std::string err="";
   
   if(!SendCommand(cmd_string, &err)){
@@ -388,6 +393,11 @@ bool DAQInterface::SendMonitoringData(const std::string& json_data, const std::s
                          + ", \"time\":"+std::to_string(timestamp)
                          + ", \"device\":\""+escape_json(name)+"\""
                          + ", \"data\":\""+escape_json(json_data)+"\" }";
+  
+  if(cmd_string.length()>655355){
+    std::cerr<<"Monitoring message is too long! Maximum length may be 655355 bytes"<<std::endl;
+    return false;
+  }
   
   std::string err="";
   
@@ -450,6 +460,11 @@ bool DAQInterface::SendTemporaryROOTplot(const std::string& plot_name, const std
                          + ", \"plot_name\":\""+escape_json(plot_name)+"\""
                          + ", \"draw_options\":\""+escape_json(draw_options)+"\""
                          + ", \"data\":\""+escape_json(json_data)+"\" }";
+  
+  if(cmd_string.length()>655355){
+    std::cerr<<"ROOT plot json is too long! Maximum length may be 655355 bytes"<<std::endl;
+    return false;
+  }
   
   std::string err="";
   
