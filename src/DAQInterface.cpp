@@ -23,8 +23,7 @@ DAQInterface::~DAQInterface(){
   sc_vars.Clear();
   delete mp_SD;
   mp_SD=0;
-  usleep(1000000); // wait for any zmq threads to finish
-  if(free_context) delete m_context;
+  //if(free_context) delete m_context;
   m_context=nullptr;
   
 }
