@@ -21,18 +21,18 @@ sources= $(filter-out  %DAQInterfaceClassDict.cpp, $(wildcard src/*.cpp))
 all: lib/libDAQInterface.so Win_Mac_translation Example/Example RemoteControl
 
 lib/libDAQInterface.so: $(sources)
-	g++ -g -O3 -fPIC  -Wpedantic -std=c++11 -shared $(sources) -I include -o lib/libDAQInterface.so -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
+	g++ -O3 -fPIC  -Wpedantic -std=c++11 -shared $(sources) -I include -o lib/libDAQInterface.so -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
 
 Win_Mac_translation: Win_Mac_translation.cpp
 	g++ -O3  -Wpedantic -std=c++11 Win_Mac_translation.cpp -o Win_Mac_translation  -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
 
 # this is the default example showing the majority of features
 Example/Example: Example/Example.cpp
-	g++ -g -O3  -Wpedantic -std=c++14 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib)
+	g++ -O3  -Wpedantic -std=c++14 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib)
 
 # this is required ONLY to demonstrate the use of storing and retreiving ROOT plots in the database
 Example/Example_root: Example/Example_root.cpp
-	g++ -g -O3  -Wpedantic -std=c++14 $(RootFlags) $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(RootLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
+	g++ -O3  -Wpedantic -std=c++14 $(RootFlags) $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(RootLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
 
 # this is required ONLY if you want to run the python example, or use the libDAQInterface in python
 lib/libDAQInterfaceClassDict.so: include/DAQInterface.h include/DAQInterfaceLinkdef.h
