@@ -55,7 +55,7 @@ class DAQInterface{
   
   SlowControlCollection* GetSlowControlCollection();
   SlowControlElement* GetSlowControlVariable(std::string key);
-  bool AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> function=nullptr);
+  bool AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> change_function=nullptr, std::function<std::string(const char*)> read_function=nullptr);
   bool RemoveSlowControlVariable(std::string name);
   void ClearSlowControlVariables();
 

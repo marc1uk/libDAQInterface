@@ -509,9 +509,9 @@ SlowControlElement* DAQInterface::GetSlowControlVariable(std::string key){
   
 }
 
-bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> function){
+bool DAQInterface::AddSlowControlVariable(std::string name, SlowControlElementType type, std::function<std::string(const char*)> change_function, std::function<std::string(const char*)> read_function){
   
-  return sc_vars.Add(name, type, function);
+  return sc_vars.Add(name, type, change_function, read_function);
   
 }
 
