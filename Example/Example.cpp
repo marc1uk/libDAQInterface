@@ -68,13 +68,13 @@ int main(){
   
   std::string device_name = "my_device"; //name of my device
   std::string Interface_configfile = "./InterfaceConfig";
-  std::string database_name = "daq";
+  //std::string database_name = "daq";
   
   std::cout<<"Constructing DAQInterface"<<std::endl;
-  DAQInterface DAQ_inter;
+  DAQInterface DAQ_inter(Interface_configfile);
   
-  std::cout<<"Initialising DAQInterface. This may take ~15 seconds for the database to connect."<<std::endl;
-  DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface
+  //std::cout<<"Initialising DAQInterface. This may take ~15 seconds for the database to connect."<<std::endl;
+  //DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface
   
   std::cout<<"Constructing an AutomatedFunctions helper class to encapsulate callback functions"<<std::endl;
   AutomatedFunctions automated_functions(&DAQ_inter);

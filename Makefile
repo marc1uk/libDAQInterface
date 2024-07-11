@@ -6,7 +6,7 @@ ZMQInclude= -I $(Dependencies)/zeromq-4.0.7/include/
 BoostLib= -L $(Dependencies)/boost_1_66_0/install/lib -lboost_date_time -lboost_serialization -lboost_iostreams
 BoostInclude= -I $(Dependencies)/boost_1_66_0/install/include
 
-ToolDAQLib= -L $(Dependencies)/ToolDAQFramework/lib -lServiceDiscovery -lDAQStore -lDAQDataModelBase 
+ToolDAQLib= -L $(Dependencies)/ToolDAQFramework/lib -lServiceDiscovery -lDAQStore -lDAQDataModelBase
 ToolDAQInclude= -I $(Dependencies)/ToolDAQFramework/include
 
 ToolFrameworkLib= -L $(Dependencies)/ToolFrameworkCore/lib -lStore -lDataModelBase
@@ -21,7 +21,7 @@ sources= $(filter-out  %DAQInterfaceClassDict.cpp, $(wildcard src/*.cpp))
 all: lib/libDAQInterface.so Win_Mac_translation Example/Example RemoteControl
 
 lib/libDAQInterface.so: $(sources)
-	g++ -O3 -fPIC  -Wpedantic -std=c++11 -shared $(sources) -I include -o lib/libDAQInterface.so -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
+	g++ -O3 -fPIC  -Wpedantic -std=c++11 -shared src/DAQInterface.cpp -I include -o lib/libDAQInterface.so -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)
 
 Win_Mac_translation: Win_Mac_translation.cpp
 	g++ -O3  -Wpedantic -std=c++11 Win_Mac_translation.cpp -o Win_Mac_translation  -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib)

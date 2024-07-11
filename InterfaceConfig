@@ -1,3 +1,5 @@
+UUID 1234
+device_name Example
 verbosity 1
 ZMQ_IDENTITY newdaq01
 clt_pub_port 55556

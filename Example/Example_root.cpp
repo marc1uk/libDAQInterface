@@ -34,9 +34,11 @@ int main(int argc, const char** argv){
 	std::string database_name = "daq";
 	
 	std::cout<<"Constructing DAQinterface"<<std::endl;
-	DAQInterface DAQ_inter;
-	std::cout<<"Intialising (this may take a few seconds until the database connects)"<<std::endl;
-	DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface
+	 std::cout<<"Constructing DAQInterface"<<std::endl;
+	 DAQInterface DAQ_inter(Interface_configfile);
+	 //DAQInterface DAQ_inter;
+	//std::cout<<"Intialising (this may take a few seconds until the database connects)"<<std::endl;
+	//	DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface
 	
 	// make a ROOT TApplication so that we can display graphs
 	std::cout<<"Creating TApplication (only required for displaying graphs locally)"<<std::endl;
