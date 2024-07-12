@@ -174,7 +174,8 @@ int main(int argc, const char** argv){
 	canv->cd(2);
 	if(ret_hist) ret_hist->Draw(ret_hist_draw_options.c_str());
 	
-	// wait until user closes the canvas
+	// wait until user closes the canvas <uncomment if your running this locally and want to see the canvas>
+	/*
 	DAQ_inter.sc_vars["Status"]->SetValue("Waiting for user to close canvas");
 	std::cout<<"Waiting for user to close canvas"<<std::endl;
 	while(gROOT->FindObject("canv")!=nullptr){
@@ -183,6 +184,7 @@ int main(int argc, const char** argv){
 		gSystem->ProcessEvents();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
+	*/
 	canv=nullptr; // deleted when the user closes it.
 	
 	// don't forget to delete the objects not encapsulated within a unique_ptr

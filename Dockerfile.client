@@ -24,7 +24,8 @@ RUN cd / \
     && chmod a+x  ./Setup.sh \
     && source ./Setup.sh \
     && make clean \
-    && make
+    && make \
+    && make Example/Example_root
 
 
-CMD /bin/bash -c "cd /web && . Setup.sh && ./Example/Example"
+CMD /bin/bash -c "cd /web && . Setup.sh && ./Example/Example_root"
