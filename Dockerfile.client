@@ -28,4 +28,4 @@ RUN cd / \
     && make Example/Example_root
 
 
-CMD /bin/bash -c "cd /web && . Setup.sh && ./Example/Example_root"
+CMD /bin/bash -c "cd /web && . Setup.sh && ./Example/Example"
