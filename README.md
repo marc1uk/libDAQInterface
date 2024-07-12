@@ -4,7 +4,11 @@ This code provides an interface library to the SQL databases, monitoring and slo
 
 # Installation
 
-To install the required dependencies run:
+  - Install Prerequisites: 
+     - RHEL/Centos... ``` yum install git make gcc-c++ zlib-devel dialog ```
+     - Debian/Ubuntu.. ``` apt-get install git make g++ libz-dev dialog ```
+
+To install the other required dependencies run:
 
       ./GetDepenencies.sh
 
