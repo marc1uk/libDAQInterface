@@ -60,7 +60,6 @@ if __name__ == "__main__":
   print("Initialising daqinterface")
   # initialise DAQInterface
   DAQ_inter = DAQInterface(Interface_configfile)
-  #DAQ_inter.Init(device_name, Interface_configfile, database_name)
   automated_functions = AutomatedFunctions(DAQ_inter, device_name)
   
   # set initial status so we can track when the service is ready

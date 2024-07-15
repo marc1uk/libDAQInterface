@@ -72,10 +72,7 @@ int main(){
   
   std::cout<<"Constructing DAQInterface"<<std::endl;
   DAQInterface DAQ_inter(Interface_configfile);
-  
-  //std::cout<<"Initialising DAQInterface. This may take ~15 seconds for the database to connect."<<std::endl;
-  //DAQ_inter.Init(device_name, Interface_configfile, database_name);  // initialiing DAQInterface
-  
+    
   std::cout<<"Constructing an AutomatedFunctions helper class to encapsulate callback functions"<<std::endl;
   AutomatedFunctions automated_functions(&DAQ_inter);
   // N.B. callback functions can simply be ordinary free functions, or they may be member functions

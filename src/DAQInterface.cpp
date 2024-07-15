@@ -6,6 +6,9 @@ DAQInterface::DAQInterface(std::string configuration_file){
 
   vars.Initialise(configuration_file);
   if(!vars.Get("device_name",m_name)) m_name = "unnamed";
+  vars.Set("service_name",m_name);
+
+  
   
   m_context = new zmq::context_t(1);
   mp_SD = new ServiceDiscovery(true, false, 88888, "239.192.1.1", 5000, m_context, boost::uuids::random_generator()(), m_name, 5, 60);
