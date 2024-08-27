@@ -28,11 +28,11 @@ Win_Mac_translation: Win_Mac_translation.cpp lib/libDAQInterface.so
 
 # this is the default example showing the majority of features
 Example/Example: Example/Example.cpp lib/libDAQInterface.so
-	g++ -O3  -Wpedantic -std=c++14 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib) 
+	g++ -O3  -Wpedantic -std=c++11 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib) 
 
 # this is required ONLY to demonstrate the use of storing and retreiving ROOT plots in the database
 Example/Example_root: Example/Example_root.cpp lib/libDAQInterface.so
-	g++ -O3  -Wpedantic -std=c++14 $(RootFlags) $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(RootLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolDAQLib) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib)
+	g++ -O3  -Wpedantic -std=c++11 $(RootFlags) $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(RootLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolDAQLib) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib)
 
 # this is required ONLY if you want to run the python example, or use the libDAQInterface in python
 lib/libDAQInterfaceClassDict.so: include/DAQInterface.h include/DAQInterfaceLinkdef.h

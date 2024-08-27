@@ -11,7 +11,7 @@ DAQInterface::DAQInterface(std::string configuration_file){
   
   
   m_context = new zmq::context_t(1);
-  mp_SD = new ServiceDiscovery(true, false, 88888, "239.192.1.1", 5000, m_context, boost::uuids::random_generator()(), m_name, 5, 60);
+  mp_SD = new ServiceDiscovery(true, false, 60000, "239.192.1.1", 5000, m_context, boost::uuids::random_generator()(), m_name, 5, 60);
   
   m_services= new Services();
   m_services->Init(vars, m_context, &sc_vars);
