@@ -66,13 +66,13 @@ int main(){
   
   ////////////////////////////// setup /////////////////////////////////
   
-  std::string device_name = "my_device"; //name of my device
   std::string Interface_configfile = "./InterfaceConfig";
   //std::string database_name = "daq";
   
   std::cout<<"Constructing DAQInterface"<<std::endl;
   DAQInterface DAQ_inter(Interface_configfile);
-    
+  std::string device_name = DAQ_inter.GetDeviceName(); //name of my device
+  
   std::cout<<"Constructing an AutomatedFunctions helper class to encapsulate callback functions"<<std::endl;
   AutomatedFunctions automated_functions(&DAQ_inter);
   // N.B. callback functions can simply be ordinary free functions, or they may be member functions
@@ -186,12 +186,12 @@ int main(){
   int version=-1; //version of configuration to get; -1 to get the latest
   
   std::cout<<"Getting configuration settings from database"<<std::endl;
-  bool ok = DAQ_inter.GetConfig(config_json, version); //get configuration from database
+  bool ok = DAQ_inter.GetDeviceConfig(config_json, version); //get configuration from database
   
   // check we got a valid configuration back.
   if(!ok || config_json==""){
     
-    std::cerr<<"No confguration for device "<<device_name<<", version "<<version<<" found"<<std::endl;
+    std::cerr<<"No configuration for device "<<device_name<<", version "<<version<<" found"<<std::endl;
     // Actually, the first time this Example is run, the database will be empty,
     // so there will be no such configuration and this is expected.
     // Let's create an arbitrary configuration, and demonstrate entering it into the database.
@@ -213,12 +213,12 @@ int main(){
     configuration>>config_json; //output current configuration to json
     
     if(verbose) std::cout<<"sending configuration json '"<<config_json<<"' to database"<<std::endl;
-    DAQ_inter.SendConfig(config_json, "John Doe", "My New Config"); //uplaod configuration to database
+    DAQ_inter.SendDeviceConfig(config_json, "John Doe", "My New Config"); //uplaod configuration to database
     
   } else{
     
     // the second time we run this example, the saved configuration will exist and be returned.
-    std::cout<<"Got configuration version "<<version<<std::endl;
+    std::cout<<"Got configuration version "<<((version<0) ? "latest" : std::to_string(version))<<std::endl;;
     configuration.JsonParser(config_json); //loading json into variable store
     
     if(verbose){
@@ -272,6 +272,21 @@ int main(){
   plot.ylabel = "y";
   // plot.info stores a generic JSON. It is not processed by ToolDAQ and can be used to attach extra information to a plot.
   plot.info.Set("comment", "example plot"); // -> { "comment": "example plot" }
+  
+  /////////////////////////// generic SQL query example //////////////////////
+  
+  std::string resp;
+  std::cout<<"Testing submitting generic SQL queries"<<std::endl;
+  // single-record query
+  bool qryok = DAQ_inter.SQLQuery("daq","SELECT config_id, name, version, data FROM configurations",resp);
+  std::cout<<"single-record query success: "<<qryok<<", response: '"<<resp<<"'"<<std::endl;
+  
+  // for multi-record queries
+  std::vector<std::string> resps;
+  qryok = DAQ_inter.SQLQuery("daq","SELECT version, data FROM device_config WHERE device='"+device_name+"'",resps);
+  std::cout<<"multi-record query success: "<<qryok<<", got "<<resps.size()<<" records:"<<std::endl;
+  for(int i=0; i<std::min(resps.size(),size_t(5)); ++i) std::cout<<i<<": '"<<resps.at(i)<<"'"<<std::endl;
+  if(resps.size()>5) std::cout<<"...\n"<<std::endl;
   
   /////////////////////////// program operation //////////////////////
   
