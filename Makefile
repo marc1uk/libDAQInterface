@@ -12,6 +12,9 @@ ToolDAQInclude= -I $(Dependencies)/ToolDAQFramework/include
 ToolFrameworkLib= -L $(Dependencies)/ToolFrameworkCore/lib -lStore -lDataModelBase
 ToolFrameworkInclude= -I $(Dependencies)/ToolFrameworkCore/include
 
+PostgresLib= -L $(Dependencies)/libpqxx-6.4.5/install/lib -lpqxx -L `pg_config --libdir` -lpq
+PostgresInclude= -I $(Dependencies)/libpqxx-6.4.5/install/include -I `pg_config --includedir`
+
 RootInclude= -I`root-config --incdir`
 RootFlags=`root-config --cflags`
 RootLib= `root-config --libs`
@@ -20,7 +23,7 @@ sources= $(filter-out  %DAQInterfaceClassDict.cpp, $(wildcard src/*.cpp))
 
 .phony: python
 
-all: lib/libDAQInterface.so Win_Mac_translation Example/Example RemoteControl
+all: lib/libDAQInterface.so Win_Mac_translation Example/Example Example/Sender RemoteControl
 
 lib/libDAQInterface.so: $(sources)
 	g++ -O3 -fPIC  -Wpedantic -std=c++11 -shared src/DAQInterface.cpp -I include -o lib/libDAQInterface.so -lpthread  $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(BoostLib)
@@ -30,7 +33,11 @@ Win_Mac_translation: Win_Mac_translation.cpp lib/libDAQInterface.so
 
 # this is the default example showing the majority of features
 Example/Example: Example/Example.cpp lib/libDAQInterface.so
-	g++ -O3  -Wpedantic -std=c++11 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib) 
+	g++ -O3  -Wpedantic -std=c++11 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib)
+
+# sender benchmarking
+Example/Sender: Example/Sender.cpp lib/libDAQInterface.so
+	g++ $(CXXFLAGS) -Wpedantic -std=c++11 $^ -o $@ -I ./include/ -L lib/ -lDAQInterface -lpthread $(ToolDAQInclude) $(ToolDAQLib) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(BoostInclude) $(ZMQInclude) $(PostgresInclude) $(ZMQLib) $(ToolDAQLib) $(BoostLib) $(ToolDAQLib)  $(PostgresLib)
 
 # this is required ONLY to demonstrate the use of storing and retreiving ROOT plots in the database
 Example/Example_root: Example/Example_root.cpp lib/libDAQInterface.so
