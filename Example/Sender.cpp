@@ -357,7 +357,7 @@ class SendManager{
 					    + timestring               + "','"
 					    + thread_name              + "',"
 					    + "0"                      + ",'"
-					    + msg                 
+					    + msg
 					    + "' )";
 			} // otherwise JSON wrapping and other fields are handled by libDAQInterface
 			return;

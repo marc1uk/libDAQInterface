@@ -6,7 +6,7 @@ ZMQInclude= -I $(Dependencies)/zeromq-4.0.7/include/
 BoostLib= -L $(Dependencies)/boost_1_66_0/install/lib -lboost_date_time -lboost_serialization -lboost_iostreams
 BoostInclude= -I $(Dependencies)/boost_1_66_0/install/include
 
-ToolDAQLib= -L $(Dependencies)/ToolDAQFramework/lib   -lDAQDataModelBase -lServiceDiscovery -lDAQStore
+ToolDAQLib= -L $(Dependencies)/ToolDAQFramework/lib   -lServiceDiscovery -lDAQDataModelBase -lDAQStore
 ToolDAQInclude= -I $(Dependencies)/ToolDAQFramework/include
 
 ToolFrameworkLib= -L $(Dependencies)/ToolFrameworkCore/lib -lStore -lDataModelBase
@@ -52,8 +52,8 @@ lib/libDAQInterfaceClassDict.so: include/DAQInterface.h include/DAQInterfaceLink
 	cp src/DAQInterfaceClassDict_rdict.pcm lib/
 # end python requirements
 
-RemoteControl: Dependencies/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp lib/libDAQInterface.so
-	g++ -O3  -Wpedantic -std=c++11 Dependencies/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp -o RemoteControl  -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(ToolDAQLib) $(BoostLib)
+RemoteControl: $(Dependencies)/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp lib/libDAQInterface.so
+	g++ -O3  -Wpedantic -std=c++11 $(Dependencies)/ToolDAQFramework/src/RemoteControl/RemoteControl.cpp -o RemoteControl  -I ./include/ -L lib/ -lDAQInterface -lpthread $(BoostInclude) $(BoostLib) $(ZMQInclude) $(ZMQLib) $(ToolDAQLib) $(ToolDAQInclude) $(ToolFrameworkInclude) $(ToolFrameworkLib) $(ToolDAQLib) $(BoostLib)
 
 clean:
 	rm -f lib/libDAQInterface.so RemoteControl Win_Mac_translation Example/Example Example/Example_root
