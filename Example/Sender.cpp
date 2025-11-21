@@ -284,9 +284,10 @@ class SendManager{
 		// if bypassing middleman, we may do message batching.
 		// (batching by libDAQInterface TODO but would be hidden from end user anyway)
 		int batch_size=1;                // number of messages to batch up before sending.
-		int randomize_batchsize=false;   // whether to randomize number of messages in each batch.
+		bool randomize_batchsize=false;  // whether to randomize number of messages in each batch.
 		int batch_size_min=1;            // if randomizing, minimum batch size.
 		int batch_size_max=100;          // if randomizing, maximum batch size.
+		bool print_results=false;        // whether this thread should print its info
 		
 		// gettem all from Store
 		arg_store->Get("n_msgs",n_msgs);
@@ -306,6 +307,8 @@ class SendManager{
 		arg_store->Get("randomize_batchsize",randomize_batchsize);
 		arg_store->Get("batch_size_min",batch_size_min);
 		arg_store->Get("batch_size_max",batch_size_max);
+		arg_store->Get("print_results",print_results);
+		//printf("thread %s will send %d messages\n",thread_name.c_str(),n_msgs);
 		
 		// be generous
 		if(msg_length_max<msg_length_min) std::swap(msg_length_min,msg_length_max);
@@ -339,7 +342,7 @@ class SendManager{
 		};
 		
 		// helper function to generate random messages
-		auto generate_msg = [&msg, &randomize_msglen, &msg_length, &msg_length_min, &msg_length_max, &bypass_middleman, &as_query, &random, &generate_timestring, &timestring, &thread_name]() -> void {
+		auto generate_msg = [&msg, &randomize_msglen, &msg_length, &msg_length_min, &msg_length_max, &bypass_middleman, &as_query, &random, &generate_timestring, &timestring/*, &thread_name*/]() -> void {
 			if(randomize_msglen){
 				msg_length = random(msg_length_min, msg_length_max);
 			}
@@ -368,7 +371,7 @@ class SendManager{
 		std::string query;
 		
 		// helper function to generate queries (assumes bypass_middleman)
-		auto generate_query = [&query, &msg, &randomize_msg, &randomize_batchsize, &batch_size, &batch_size_min, &batch_size_max, &random, &generate_msg, &prefix]() -> void {
+		auto generate_query = [&query, &msg, &randomize_msg, &randomize_batchsize, &batch_size, &batch_size_min, &batch_size_max, &random, &generate_msg/*, &prefix*/]() -> void {
 			query=prefix;
 			if(randomize_batchsize){
 				batch_size = random(batch_size_min, batch_size_max);
@@ -435,7 +438,9 @@ class SendManager{
 		
 		std::chrono::time_point<std::chrono::high_resolution_clock> tot_start = std::chrono::high_resolution_clock::now();
 		// loop until sending is done
+		size_t loops=0;
 		while(m_args->running){
+			++loops;
 			std::chrono::time_point<std::chrono::high_resolution_clock> snd_start = std::chrono::high_resolution_clock::now();
 			// send next message (or batch)
 			if(bypass_middleman){
@@ -458,10 +463,12 @@ class SendManager{
 					ok = DAQ_inter->SQLQuery("daq",query,response);
 				}
 				
+				// various other types depending on what we're benchmarking TODO
 				//bool ok = DAQ_inter.SendAlarm(msg, 0, thread_name); // to test zmq Write speed XXX XXX NEEDS TIMEOUT XXX XXX disable multicast in backend!
 				//bool ok = DAQ_inter.GetDeviceConfig(config_json, version, thread_name); // to test Read speed, XXX XXX NEEDS TIMEOUT NEED TO VARY RECORD XXX XXX
 				// bool ok = DAQ_inter.SendDeviceConfig(config_json, "John Doe", "My New Config"); //for pre-filling...
 				//bool ok = DAQ_inter.SQLQuery("daq",query,response, timeout); // Or maybe this is easier? response can be string or vector for num records
+				
 				if(!ok) ++msg_failures;
 				++msgs_sent;
 				bytes_sent += msg.length();
@@ -475,10 +482,10 @@ class SendManager{
 			}
 			
 			// break if it's time to stop
-			if(msgs_sent==n_msgs) break;
+			if(msgs_sent==n_msgs){ /*printf("all msgs sent, break\n");*/ break; }
 			if(duration_ms>0){
 				std::chrono::milliseconds tot_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tot_start);
-				if(tot_time.count()>duration_ms) break;
+				if(tot_time.count()>duration_ms){ /*printf("duration met, break\n");*/ break; }
 			}
 			
 			// sleep to maintain rate
@@ -490,6 +497,7 @@ class SendManager{
 			if(sleep_time>0) usleep(sleep_time*1000);
 			
 		}
+		//printf("loops: %d, running %d\n",loops,m_args->running);
 		
 		std::chrono::milliseconds tot_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tot_start);
 		
@@ -498,12 +506,14 @@ class SendManager{
 			conn=nullptr;
 		}
 		
-		//std::clog<<"thread "<<thread_name<<" sent "<<msgs_sent<<" messages totalling "<<bytes_sent
-		//         <<" bytes in "<<tot_time.count()<<"ms, of which "<<msg_failures<<" failed"<<std::endl;
-		
 		// pass them back for cumulative sum from all threads
 		int runtime = tot_time.count();
 		std::valarray<int> results{msgs_sent, bytes_sent, msg_failures, runtime, max_snd_ms};
+		
+		if(print_results){
+			std::clog<<"thread "<<thread_name<<" sent "<<msgs_sent<<" messages in "<<loops<<" loops, totalling "<<bytes_sent
+			         <<" bytes in "<<tot_time.count()<<"ms, of which "<<msg_failures<<" failed"<<std::endl;
+		}
 		
 		return results;
 	} // end of LogSender method
@@ -523,7 +533,13 @@ int main(int argc, const char** argv){
 	if(verbose) std::clog<<"Constructing DAQInterface and waiting for middleman to connect"<<std::endl;
 	DAQInterface DAQ_inter(Interface_configfile);
 	std::string device_name = DAQ_inter.GetDeviceName(); //name of my device
+	std::clog<<"DAQInterface should be connected! Sending test log"<<std::endl;
+	std::this_thread::sleep_for(std::chrono::seconds(1));
 	bool ok = DAQ_inter.SendLog("test logging", 0, device_name);
+	if(!ok){
+		std::cerr<<"Test log failed!"<<std::endl;
+		return 1;
+	}
 	
 	if(verbose) std::clog<<"Constructing SendManager"<<std::endl;
 	SendManager send_mgr(&DAQ_inter, verbose);
