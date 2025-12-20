@@ -95,13 +95,13 @@ bool DAQInterface::GetRunConfig(std::string& json_data, const std::string& name,
 
 bool DAQInterface::GetDeviceConfigFromRunConfig(std::string& json_data, const int runconfig_id, const std::string& device, const unsigned int timeout){
   
-  return m_services->GetRunDeviceConfig(json_data, runconfig_id, device, nullptr, timeout);
+  return m_services->GetRunDeviceConfig(json_data, runconfig_id, device, /*nullptr,*/ timeout);
   
 }
 
 bool DAQInterface::GetDeviceConfigFromRunConfig(std::string& json_data, const std::string& runconfig_name, const int runconfig_version, const std::string& device, const unsigned int timeout){
   
-  return m_services->GetRunDeviceConfig(json_data, runconfig_name, runconfig_version, device, nullptr, timeout);
+  return m_services->GetRunDeviceConfig(json_data, runconfig_name, runconfig_version, device, /*nullptr,*/ timeout);
   
 }
 
@@ -117,22 +117,22 @@ bool DAQInterface::GetPlotlyPlot(const std::string& name, int& version, std::str
   return m_services->GetPlotlyPlot(name, version, trace, layout, timestamp, timeout);
 }
 
-bool DAQInterface::SQLQuery(const std::string& database, const std::string& query, std::vector<std::string>& responses, const unsigned int timeout){
+bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& query, std::vector<std::string>& responses, const unsigned int timeout){
   
   
-  return m_services->SQLQuery(database, query, responses, timeout);
+  return m_services->SQLQuery(/*database,*/ query, responses, timeout);
   
 }
 
-bool DAQInterface::SQLQuery(const std::string& database, const std::string& query, std::string& response, const unsigned int timeout){
+bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& query, std::string& response, const unsigned int timeout){
   
   
-  return m_services->SQLQuery(database, query, response, timeout);
+  return m_services->SQLQuery(/*database,*/ query, response, timeout);
 }
 
-bool DAQInterface::SQLQuery(const std::string& database, const std::string& query, const unsigned int timeout){
+bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& query, const unsigned int timeout){
   
-  return m_services->SQLQuery(database, query, timeout);
+  return m_services->SQLQuery(/*database,*/ query, timeout);
   
 }
 
@@ -154,22 +154,23 @@ bool DAQInterface::SendMonitoringData(const std::string& json_data, const std::s
 }
 
 // wrapper to send a root plot either to a temporary table or a persistent one
-bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, bool persistent, int* version, const int64_t timestamp, const unsigned int timeout){
-  if(!persistent) return SendTemporaryROOTplot(plot_name, draw_options, json_data, version, timestamp);
-  return SendPersistentROOTplot(plot_name, draw_options, json_data, version, timestamp, timeout);
+bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, bool acknowledged, const int64_t timestamp, const unsigned int timeout){
+  unsigned int version;
+  if(!acknowledged) return SendROOTplotMulticast(plot_name, draw_options, json_data, timestamp);
+  return SendROOTplotZmq(plot_name, draw_options, json_data, &version, timestamp, timeout);
 }
 
 // send to persistent table over TCP
-bool DAQInterface::SendPersistentROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const int64_t timestamp, const unsigned int timeout){
+bool DAQInterface::SendROOTplotZmq(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const int64_t timestamp, const unsigned int timeout){
   
-  return m_services->SendPersistentROOTplot(plot_name, draw_options, json_data, version, timestamp, timeout);
+  return m_services->SendROOTplotZmq(plot_name, draw_options, json_data, version, timestamp, timeout);
   
 }
 
 // send to temporary table over multicast
-bool DAQInterface::SendTemporaryROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const int64_t timestamp){
+bool DAQInterface::SendROOTplotMulticast(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, const int64_t timestamp){
   
-  return m_services->SendTemporaryROOTplot(plot_name, draw_options, json_data, version, timestamp);
+  return m_services->SendROOTplotMulticast(plot_name, draw_options, json_data, timestamp);
   
 }
 
