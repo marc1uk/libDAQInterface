@@ -175,7 +175,9 @@ class SendManager{
 		// the destructors of the futures returned by std::async spawning will block until the threads are done.
 		// To return a propmt response to our SlowControl caller, we can defer this to a separate thread
 		m_log(v_message)<<"creating reporter"<<std::endl;
-		std::async(std::launch::async, &SendManager::WaitLoggers, this);
+		std::future<void> ret = std::async(std::launch::async, &SendManager::WaitLoggers, this);
+		// just to avoid the compiler 'nodiscard' warning, capture the future and wait on it
+		ret.wait();
 		
 		m_log(v_message)<<"done"<<std::endl;
 		return "started "+std::to_string(n_threads)+" loggers";
@@ -447,7 +449,7 @@ class SendManager{
 				generate_query();
 				pqxx::nontransaction txn(*conn);
 				try {
-					txn.exec0(query);
+					txn.exec(query);
 				} catch(std::exception& e){
 					std::cerr<<"thread "<<thread_name<<" exception "<<e.what()<<" sending message "<<msgs_sent<<std::endl;
 					++msg_failures;
@@ -460,7 +462,7 @@ class SendManager{
 					ok = DAQ_inter->SendLog(msg, 0, thread_name); // msg, severity, device
 				} else {
 					if(randomize_msg) generate_query();
-					ok = DAQ_inter->SQLQuery("daq",query,response);
+					ok = DAQ_inter->SQLQuery(query,response);
 				}
 				
 				// various other types depending on what we're benchmarking TODO

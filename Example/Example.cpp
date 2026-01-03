@@ -294,12 +294,12 @@ int main(){
   std::string resp;
   std::cout<<"Testing submitting generic SQL queries"<<std::endl;
   // single-record query
-  bool qryok = DAQ_inter.SQLQuery("daq","SELECT config_id, name, version, data FROM configurations",resp);
+  bool qryok = DAQ_inter.SQLQuery("SELECT time, message FROM logging ORDER BY time DESC LIMIT 1",resp);
   std::cout<<"single-record query success: "<<qryok<<", response: '"<<resp<<"'"<<std::endl;
   
   // for multi-record queries
   std::vector<std::string> resps;
-  qryok = DAQ_inter.SQLQuery("daq","SELECT version, data FROM device_config WHERE device='"+device_name+"'",resps);
+  qryok = DAQ_inter.SQLQuery("SELECT time, message FROM logging ORDER BY time DESC LIMIT 5",resps);
   std::cout<<"multi-record query success: "<<qryok<<", got "<<resps.size()<<" records:"<<std::endl;
   for(int i=0; i<std::min(resps.size(),size_t(5)); ++i) std::cout<<i<<": '"<<resps.at(i)<<"'"<<std::endl;
   if(resps.size()>5) std::cout<<"...\n"<<std::endl;

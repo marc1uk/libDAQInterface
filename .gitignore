@@ -11,6 +11,7 @@ main
 NodeDaemon
 RemoteControl
 Example/Sender
+Example/DBTest
 Example/Example
 Example/Example_root
 Win_Mac_translation
