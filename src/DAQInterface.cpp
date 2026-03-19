@@ -36,14 +36,19 @@ DAQInterface::~DAQInterface(){
   
 }
 
+void DAQInterface::SetVerbose(bool in){
+	m_verbose=in;
+	return;
+}
+
 
 // ===========================================================================
 // Write Functions
 // ---------------
 
-bool DAQInterface::SendAlarm(const std::string& message, unsigned int level, const std::string& device, const uint64_t timestamp, const unsigned int timeout){
+bool DAQInterface::SendAlarm(const std::string& message, bool critical, const std::string& device, const uint64_t timestamp, const unsigned int timeout){
   
-  return m_services->SendAlarm(message, level, device, timestamp, timeout);
+  return m_services->SendAlarm(message, critical, device, timestamp, timeout);
   
 }
 
@@ -56,12 +61,6 @@ bool DAQInterface::SendCalibrationData(const std::string& json_data, const std::
 bool DAQInterface::SendDeviceConfig(const std::string& json_data, const std::string& author, const std::string& description, const std::string& device, const uint64_t timestamp, int* version, const unsigned int timeout){
   
   return m_services->SendDeviceConfig(json_data, author, description, device, timestamp, version, timeout);
-  
-}
-
-bool DAQInterface::SendRunConfig(const std::string& json_data, const std::string& name, const std::string& author, const std::string& description, const uint64_t timestamp, int* version, const unsigned int timeout){
-  
-  return m_services->SendRunConfig(json_data, name, author, description, timestamp, version, timeout);
   
 }
 
@@ -87,29 +86,31 @@ bool DAQInterface::GetDeviceConfig(std::string& json_data, int version, const st
   
 }
 
-bool DAQInterface::GetRunConfig(std::string& json_data, int config_id, const unsigned int timeout){
+bool DAQInterface::GetRunConfig(std::string& json_data, const int base_config_id, const int runmode_config_id, const unsigned int timeout){
   
-  return m_services->GetRunConfig(json_data, config_id, timeout);
-  
-}
-
-bool DAQInterface::GetRunConfig(std::string& json_data, const std::string& name, int version, const unsigned int timeout){
-  
-  return m_services->GetRunConfig(json_data, name, version, timeout);
+  return m_services->GetRunConfig(json_data, base_config_id, runmode_config_id, timeout);
   
 }
 
-bool DAQInterface::GetDeviceConfigFromRunConfig(std::string& json_data, const int runconfig_id, const std::string& device, const unsigned int timeout){
+bool DAQInterface::GetRunModeConfig(std::string& json_data, const std::string& name, int version, const unsigned int timeout){
   
-  return m_services->GetRunDeviceConfig(json_data, runconfig_id, device, nullptr, timeout);
+  return m_services->GetRunModeConfig(json_data, name, version, timeout);
   
 }
 
+bool DAQInterface::GetDeviceConfigFromRunConfig(std::string& json_data, const int base_config_id, const int runmode_config_id, const std::string& device, const unsigned int timeout){
+  
+  return m_services->GetRunDeviceConfig(json_data, base_config_id, runmode_config_id, device, nullptr, timeout);
+  
+}
+
+/*
 bool DAQInterface::GetDeviceConfigFromRunConfig(std::string& json_data, const std::string& runconfig_name, const int runconfig_version, const std::string& device, const unsigned int timeout){
   
   return m_services->GetRunDeviceConfig(json_data, runconfig_name, runconfig_version, device, nullptr, timeout);
   
 }
+*/
 
 bool DAQInterface::GetROOTplot(const std::string& plot_name, std::string& draw_options, std::string& json_data, int& version, const unsigned int timeout){
   
@@ -135,22 +136,22 @@ bool DAQInterface::GetPlotlyPlot(const std::string& name, std::string& trace, st
   
 }
 
-bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& query, std::vector<std::string>& responses, const unsigned int timeout){
+bool DAQInterface::SQLQuery(const std::string& query, std::vector<std::string>& responses, const unsigned int timeout){
   
   
-  return m_services->SQLQuery(/*database,*/ query, responses, timeout);
+  return m_services->SQLQuery(query, responses, timeout);
   
 }
 
-bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& query, std::string& response, const unsigned int timeout){
+bool DAQInterface::SQLQuery(const std::string& query, std::string& response, const unsigned int timeout){
   
   
-  return m_services->SQLQuery(/*database,*/ query, response, timeout);
+  return m_services->SQLQuery(query, response, timeout);
 }
 
-bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& query, const unsigned int timeout){
+bool DAQInterface::SQLQuery(const std::string& query, const unsigned int timeout){
   
-  return m_services->SQLQuery(/*database,*/ query, timeout);
+  return m_services->SQLQuery(query, timeout);
   
 }
 
@@ -158,7 +159,7 @@ bool DAQInterface::SQLQuery(/*const std::string& database,*/ const std::string& 
 // Multicast Senders
 // -----------------
 
-bool DAQInterface::SendLog(const std::string& message, unsigned int severity, const std::string& device, const uint64_t timestamp){
+bool DAQInterface::SendLog(const std::string& message, LogLevel severity, const std::string& device, const uint64_t timestamp){
     
   return m_services->SendLog(message, severity, device, timestamp);
   
@@ -170,27 +171,12 @@ bool DAQInterface::SendMonitoringData(const std::string& json_data, const std::s
   
 }
 
-// wrapper to send a root plot either over multicast or zmq
-bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, bool acknowledged, const uint64_t timestamp, const unsigned int lifetime, const unsigned int timeout){
-  if(!acknowledged) return SendROOTplotMulticast(plot_name, draw_options, json_data, lifetime, timestamp);
-  return SendROOTplotZmq(plot_name, draw_options, json_data, nullptr, timestamp, lifetime, timeout);
-}
-
-// send over zmq
-bool DAQInterface::SendROOTplotZmq(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const uint64_t timestamp, const unsigned int lifetime, const unsigned int timeout){
+bool DAQInterface::SendROOTplot(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, int* version, const uint64_t timestamp, const unsigned int lifetime, const unsigned int timeout){
   
-  return m_services->SendROOTplotZmq(plot_name, draw_options, json_data, version, timestamp, lifetime, timeout);
+  return m_services->SendROOTplot(plot_name, draw_options, json_data, version, timestamp, lifetime, timeout);
   
 }
 
-// send over multicast
-bool DAQInterface::SendROOTplotMulticast(const std::string& plot_name, const std::string& draw_options, const std::string& json_data, const unsigned int lifetime, const uint64_t timestamp){
-  
-  return m_services->SendROOTplotMulticast(plot_name, draw_options, json_data, lifetime, timestamp);
-  
-}
-
-// FIXME for now plotlyplots always go over zmq
 bool DAQInterface::SendPlotlyPlot(const std::string& name, const std::string& trace, const std::string& layout, int* version, const uint64_t timestamp, const unsigned int lifetime, unsigned int timeout) {
   return m_services->SendPlotlyPlot(name, trace, layout, version, timestamp, lifetime, timeout);
 }
