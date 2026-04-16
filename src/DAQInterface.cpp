@@ -219,7 +219,7 @@ void DAQInterface::ClearSlowControlVariables(){
 
 }
 
-bool DAQInterface::AlertSubscribe(std::string alert, std::function<void(const char*, const char*)> function){
+bool DAQInterface::AlertSubscribe(std::string alert, std::function<bool(const char*, const char*)> function){
   
   return sc_vars.AlertSubscribe(alert, function);
   

@@ -17,13 +17,13 @@ class AutomatedFunctions {
   
   DAQInterface* DAQ_inter;
   
-  void new_event_func(const char* alert){
+  bool new_event_func(const char* alert){
     
     DAQ_inter->SendLog("Hello i received a new_event alert");
     std::cout<<"recevied a 'new_event' alert"<<std::endl;
     
     //do new event alert action, e.g. reload configuration from DB
-    
+    return true;
   }
   
   

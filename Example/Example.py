@@ -23,14 +23,15 @@ class AutomatedFunctions:
     self.DAQ_inter = iDAQ_inter
     self.name = iname
   
-  def new_event_func(self, event_name: str, event_payload: str) -> None:
+  def new_event_func(self, event_name: str, event_payload: str) -> bool:
     print("new_event_func fired for event ",event_name)
     self.DAQ_inter.SendLog(self.name+" received an alert for event "+event_name)
     # add your desired actions on new_event here
     # if this function is subscribed to multiple alerts, you can use event_name
     # to determine the appropriate actions to take
     # return type for AlertSubscribe functions is void (no return value)
-  
+    return true
+
   def start_func(self, control_name: str) -> str:
     self.DAQ_inter.SendLog(self.name," received start signal")
     # add code to perform any startup actions here

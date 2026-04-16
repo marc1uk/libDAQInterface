@@ -59,7 +59,7 @@ namespace ToolFramework {
     bool RemoveSlowControlVariable(std::string name);
     void ClearSlowControlVariables();
     
-    bool AlertSubscribe(std::string alert, std::function<void(const char*, const char*)> function);
+    bool AlertSubscribe(std::string alert, std::function<bool(const char*, const char*)> function);
     bool AlertSend(std::string alert, std::string payload);
     
     std::string PrintSlowControlVariables();
