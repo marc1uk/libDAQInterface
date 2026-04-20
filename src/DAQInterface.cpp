@@ -7,6 +7,14 @@ DAQInterface::DAQInterface(std::string configuration_file){
   vars.Initialise(configuration_file);
   if(!vars.Get("device_name",m_name)) m_name = "unnamed";
   vars.Set("service_name",m_name);
+  int remote_port = 0;
+  std::string sd_address = "239.192.1.1";
+  int sd_port = 5000;
+
+  vars.Set("remote_port", remote_port);
+  vars.Set("sd_address", sd_address);
+  vars.Set("sd_port", sd_port);
+  
 
   boost::uuids::uuid m_UUID;
   std::string s_uuid;
@@ -17,7 +25,7 @@ DAQInterface::DAQInterface(std::string configuration_file){
   }
   
   m_context = new zmq::context_t(1);
-  mp_SD = new ServiceDiscovery(true, false, 60000, "239.192.1.1", 5000, m_context,m_UUID, m_name, 5, 60);
+  mp_SD = new ServiceDiscovery(true, false, remote_port, sd_address, sd_port, m_context,m_UUID, m_name, 5, 60);
   
   m_services= new Services();
   m_services->Init(vars, m_context, &sc_vars);
@@ -240,4 +248,16 @@ std::string DAQInterface::GetDeviceName(){
   
   return m_name;
   
+}
+
+std::string DAQInterface::GetLocalConfig(){
+
+  return m_services->GetLocalConfig();
+
+}
+
+bool DAQInterface::SetLocalConfig(std::string json){
+
+  return m_services->SetLocalConfig(json);
+
 }
