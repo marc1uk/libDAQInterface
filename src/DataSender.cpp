@@ -58,6 +58,16 @@ DataSender::DataSender(DAQInterface* interface, std::string config_file){
 
 }
 
+DataSender::~DataSender(){
+
+  m_utils.KillThread(&args);
+  
+  delete args.sock;
+  args.sock = 0;
+
+}
+
+
 void DataSender::Thread(Thread_args* arg){
   
   DataSender_args* args=reinterpret_cast<DataSender_args*>(arg);

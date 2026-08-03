@@ -50,7 +50,8 @@ class DataSender{
  public:
   
   DataSender(DAQInterface* interface, std::string config_file);
-
+  ~DataSender();
+  
   bool LoadConfig(std::string json);
   bool LoadConfig(Store& vars);
   bool Add(void* data, size_t size, uint32_t coarse_counter, std::function<void(void*)> del_func);
