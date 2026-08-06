@@ -427,21 +427,18 @@ bool DAQInterface::SetChangeConfigFunc(std::function<bool(std::string)> func){
 
 bool DAQInterface::SetRunStopFunc(std::function<bool()> func){
   
-  // we'll make three things that call this function:
+  // as per SetChangeConfigFunc, but for RunStop, make:
   // 1. subscribe to alerts.
   // 2. a BUTTON slow control.
-  // 3. a COMMAND slow control.
-  // However, the signatures here are different:
-  // Alert callbacks receive an alert name and payload, and return a bool.
-  // Slow controls receive a control name, and return a string.
-  // COMMANDs have an associated string variable in the SlowControlCollection, but buttons don't.
-  // The idea here is the Alert and BUTTON will retrieve their configuration from the LocalConfig member of
-  // the SlowControlCollection, while the COMMAND will get its configuration from the slow control variable.
-  // To align these we accept something whihc is none of these, and pass it whatever's appropriate.
+  // as an addition, on RunStop clear the Services class' last base and runmode configuration IDs.
+  // the ChangeConfig callback is only invoked when these change, so by resetting them we ensure
+  // the callback is invoked on the next ChangeConfig alert,
+  // which may be required to re-start data acquisition after a RunStop.
   bool allgood=true;
   
   // 1.
   allgood = AlertSubscribe("RunStop", [this, func](const char*, const char*) -> bool{
+    m_services->ResetConfigIDs();
     if(func()) return true;
     SetWarning(true);
     std::cerr<<"RunStop Error"<<std::endl;
@@ -454,6 +451,7 @@ bool DAQInterface::SetRunStopFunc(std::function<bool()> func){
     sc_vars.Add("RunStop",  //here ben
               BUTTON,
               [this, func](const char*) -> std::string {
+                m_services->ResetConfigIDs();
                 bool ok = func();
                 if(!ok){
 		  SetWarning(true);
@@ -467,25 +465,15 @@ bool DAQInterface::SetRunStopFunc(std::function<bool()> func){
               false); // this version will not be locked during non-testing runs,
                       // since it only allows loading configurations in line with the current run type.
   
-  // 3.
-  
   return allgood;
   
 }
 
 bool DAQInterface::SetExportConfigFunc(std::function<bool(std::string&)> func){
   
-  // we'll make three things that call this function:
+  // for ExportConfig, make:
   // 1. subscribe to alerts.
   // 2. a BUTTON slow control.
-  // 3. a COMMAND slow control.
-  // However, the signatures here are different:
-  // Alert callbacks receive an alert name and payload, and return a bool.
-  // Slow controls receive a control name, and return a string.
-  // COMMANDs have an associated string variable in the SlowControlCollection, but buttons don't.
-  // The idea here is the Alert and BUTTON will retrieve their configuration from the LocalConfig member of
-  // the SlowControlCollection, while the COMMAND will get its configuration from the slow control variable.
-  // To align these we accept something whihc is none of these, and pass it whatever's appropriate.
   bool allgood=true;
   
   // 1.
