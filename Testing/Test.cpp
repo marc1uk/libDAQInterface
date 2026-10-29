@@ -78,7 +78,7 @@ int main(){
 		        "END IF; END $$ ";
 		ok = DAQ_inter.SQLQuery(query,tmp);
 		if(!ok) std::cerr<<"error inserting base config"<<std::endl;
-		query = "SELECT config_id FROM base_config WHERE name='"+device_name+"' AND version=0";
+		query = "SELECT config_id FROM base_config WHERE name='"+device_name+"' AND version=1";
 		ok = DAQ_inter.SQLQuery(query,tmp);
 		if(ok){
 			mystore.JsonParser(tmp);
@@ -93,7 +93,7 @@ int main(){
 		        "END IF; END $$ ";
 		ok = DAQ_inter.SQLQuery(query,tmp);
 		if(!ok) std::cerr<<"error inserting runmode config"<<std::endl;
-		query = "SELECT config_id FROM runmode_config WHERE name='"+device_name+"' AND version=0";
+		query = "SELECT config_id FROM runmode_config WHERE name='"+device_name+"' AND version=1";
 		ok = DAQ_inter.SQLQuery(query,tmp);
 		if(ok){
 			mystore.JsonParser(tmp);
@@ -114,7 +114,7 @@ int main(){
 	
 	// N.B: this is not a full detector configuration
 	if(verbose) std::cout<<"Getting test runmode config by name & version..."<<std::flush;
-	ok = DAQ_inter.GetRunModeConfig(tmp, device_name, 0);
+	ok = DAQ_inter.GetRunModeConfig(tmp, device_name, 1);
 	if(!ok || verbose) std::cout<<"Get run config (by name): "<<Check(ok)<<" = "<<tmp<<Reset<<std::endl;
 	
 	if(verbose) std::cout<<"Getting test device config by run id {"<<base_id<<","<<runmode_id<<"}..."<<std::flush;
@@ -145,11 +145,15 @@ int main(){
 	
 	if(verbose) std::cout<<"Testing single-record SQL query"<<Reset<<std::endl;
 	ok = DAQ_inter.SQLQuery("SELECT time, message FROM logging ORDER BY time DESC LIMIT 1",tmp);
+	ok = ok && (tmp=="test log message");
 	if(!ok || verbose) std::cout<<"Get single record via SQL: "<<Check(ok)<<" = "<<tmp<<Reset<<std::endl;
 	
 	if(verbose) std::cout<<"Testing multi-record SQL query"<<Reset<<std::endl;
+	// make sure we have >1 entries to select
+	ok = DAQ_inter.SendLog("second test log message");
 	std::vector<std::string> resps;
-	ok = DAQ_inter.SQLQuery("SELECT time, message FROM logging ORDER BY time DESC LIMIT 5",resps);
+	ok = DAQ_inter.SQLQuery("SELECT time, message FROM logging ORDER BY time DESC LIMIT 2",resps);
+	ok = ok && (resps.size()==2);
 	if(!ok || verbose) std::cout<<"Get multiple records via SQL: "<<Check(ok)<<", got "<<resps.size()<<" rows"<<std::endl;
 	if(ok && verbose){
 		for(int i=0; i<resps.size(); ++i) std::cout<<"\t"<<i<<": '"<<resps.at(i)<<"'"<<std::endl;
